@@ -30,12 +30,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
         modelBuilder.Entity<RetailCustomer>()
             .Property(c => c.LastName)
             .IsRequired()
+            
             .HasMaxLength(50);
 
         modelBuilder.Entity<RetailCustomer>()
             .Property(c => c.PersonalId)
             .IsRequired()
             .HasMaxLength(11);
+
+        modelBuilder.Entity<RetailCustomer>()
+            .HasIndex(c => c.PersonalId)
+            .IsUnique();
 
         modelBuilder.Entity<RetailCustomer>()
             .Property(c => c.DateOfBirth)
