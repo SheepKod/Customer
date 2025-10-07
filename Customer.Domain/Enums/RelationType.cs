@@ -2,7 +2,7 @@ namespace Customer.Domain.Enums;
 
 public enum RelationType
 {
-    Colleague = 1,
+    Colleague = 0,
     Acquaintance,
     Relative,
     Other
