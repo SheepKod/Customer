@@ -7,7 +7,7 @@ namespace Customer.Application;
 
 public class CustomerService(ICustomerRepository repo)
 {
-    public async Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer)
+    public async Task<int> AddCustomer(AddCustomerDTO customer)
     {
        var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
         
@@ -21,13 +21,13 @@ public class CustomerService(ICustomerRepository repo)
             CityId = customer.CityId,
             PhoneNumbers = convertedPhoneNumbers,
         };
-       var dbResult = await repo.AddCustomer(newCustomer);
-       if (dbResult == null)
+       var customerId = await repo.AddCustomer(newCustomer);
+       if (customerId == 0)
        {
            throw new CustomerCreationFailedException("There was a problem saving the customer in Database.");
        }
       
-        return dbResult;
+        return customerId;
        
     }
 
