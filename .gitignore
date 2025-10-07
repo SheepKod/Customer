@@ -1,0 +1,75 @@
+# Build results
+bin/
+obj/
+[Ll]og/
+[Bb]uild/
+TestResults/
+out/
+artifacts/
+
+# VS Code
+.vscode/
+.history/
+.vs/
+
+# db and user files
+*.db
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# NuGet
+*.nupkg
+*.snupkg
+# NuGet Packages folder can be ignored if not using PackageReference
+# packages/
+
+# Resharper/Jetbrains Rider
+*.DotSettings.user
+.ReSharper
+*.resharper
+
+# Mac system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Rider/JetBrains IDE helper
+.idea/
+
+# Publish outputs
+publish/
+*.Publish.xml
+
+# Dependency graph
+project.lock.json
+project.fragment.lock.json
+
+# MSBuild binary log
+msbuild.binlog
+
+# Visual Studio Code settings
+.vscode/
+
+# DotNet CLI
+.project.lock.json
+global.json
+
+# Runtime directory
+**/Properties/launchSettings.json
+
+# test coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Other
+*.log
+*.tmp
