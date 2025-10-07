@@ -16,7 +16,8 @@ public class CustomerService(ICustomerRepository repo)
             Gender = customer.Gender,
             PersonalId = customer.PersonalId,
             DateOfBirth = customer.DateOfBirth,
-            CityId = customer.CityId
+            CityId = customer.CityId,
+            PhoneNumbers = customer.PhoneNumbers,
         };
        var dbResult = await repo.AddCustomer(newCustomer);
        if (dbResult == null)
