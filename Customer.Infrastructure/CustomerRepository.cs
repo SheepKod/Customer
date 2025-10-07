@@ -1,5 +1,4 @@
 using Customer.Application.Abstractions;
-using Customer.Application.Dtos;
 using Customer.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,8 +6,6 @@ namespace Customer.Infrastructure;
 
 public class CustomerRepository(ApplicationDbContext context): ICustomerRepository
 {
-    
-    // TODO: Continue implementation
     public async Task<int> AddCustomer(IndividualCustomer customer)
     {
         
@@ -21,6 +18,21 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
     public async Task<IndividualCustomer?> GetCustomerById(int customerId)
     {
         var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.Id == customerId);
+        return customer;
+    }
+    
+    public async Task<IndividualCustomer?> GetCustomerByPersonalId(string personalId)
+    {
+        var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.PersonalId == personalId);
+        return customer;
+    }
+    
+    public async Task<IndividualCustomer?> GetCustomerFullDetailsById(int customerId)
+    {
+        var customer = await context.RetailCustomers
+            .Include(c=> c.PhoneNumbers)
+            .Include(c=> c.Relations)
+            .FirstOrDefaultAsync(c => c.Id == customerId);
         return customer;
     }
 
