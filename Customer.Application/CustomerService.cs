@@ -9,11 +9,8 @@ public class CustomerService(ICustomerRepository repo)
 {
     public async Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer)
     {
-        List<PhoneNumber> convertedPhoneNumbers = customer.PhoneNumbers.Select(dto => new PhoneNumber
-        {
-            Number = dto.Number,
-            Type = dto.Type,
-        }).ToList();
+       var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
+        
        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
@@ -33,4 +30,14 @@ public class CustomerService(ICustomerRepository repo)
         return dbResult;
        
     }
+
+    private List<PhoneNumber> ConvertPhoneNumbers(List<PhoneNumberDTO> phoneNumbers)
+    {
+        return phoneNumbers.Select(dto => new PhoneNumber
+        {
+            Number = dto.Number,
+            Type = dto.Type,
+        }).ToList();
+    }
+    
 }

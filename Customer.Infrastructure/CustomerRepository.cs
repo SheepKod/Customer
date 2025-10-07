@@ -11,13 +11,9 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
     public async Task<IndividualCustomer?> AddCustomer(IndividualCustomer customer)
     {
         
-       await context.RetailCustomers.AddAsync(customer);
+       var newCustomer = await context.RetailCustomers.AddAsync(customer);
        
-       var result = await context.SaveChangesAsync();
-       if (result <= 0)
-       {
-           return null;
-       }
-       return customer;
+       await context.SaveChangesAsync();
+       return newCustomer.Entity;
     }
 }
