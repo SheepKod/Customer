@@ -25,6 +25,11 @@ public class CustomerService(ICustomerRepository repo)
         return customerId;
        
     }
+    
+    public async Task DeleteCustomer(int customerId)
+    {
+        await repo.DeleteCustomer(customerId);
+    }
 
     private List<PhoneNumber> ConvertPhoneNumbers(List<PhoneNumberDTO> phoneNumbers)
     {
