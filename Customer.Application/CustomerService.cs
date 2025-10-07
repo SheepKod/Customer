@@ -1,6 +1,5 @@
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
-using Customer.Application.Exceptions;
 using Customer.Domain.Models;
 
 namespace Customer.Application;
