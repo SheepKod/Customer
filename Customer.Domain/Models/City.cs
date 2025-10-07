@@ -2,7 +2,7 @@ namespace Customer.Domain.Models;
 
 public class City
 {
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Country { get; init; } = string.Empty;
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
 }
