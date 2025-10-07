@@ -14,7 +14,7 @@ public class CustomerController(CustomerService customerService): ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
     [ProducesResponseType(503)]
-    public async Task<ActionResult<IndividualCustomer>> AddCustomer(AddCustomerDTO customer)
+    public async Task<ActionResult<int>> AddCustomer(AddCustomerDTO customer)
     {
 
         try
