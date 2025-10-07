@@ -8,25 +8,22 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
 {
     
     // TODO: Continue implementation
-    public async Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer)
+    public async Task<IndividualCustomer?> AddCustomer(IndividualCustomer customer)
     {
-        var newCustomer = new IndividualCustomer
-        {
-            FirstName = customer.FirstName,
-            LastName = customer.LastName,
-            Gender = customer.Gender,
-            PersonalId = customer.PersonalId,
-            DateOfBirth = customer.DateOfBirth,
-            CityId = customer.CityId
-        };
-       await context.RetailCustomers.AddAsync(newCustomer);
+        
+       await context.RetailCustomers.AddAsync(customer);
 
        foreach (var phoneNumber in customer.PhoneNumbers)
        {
            await context.PhoneNumbers.AddAsync(phoneNumber);
        }
        
+       
        var result = await context.SaveChangesAsync();
-       return newCustomer;
+       if (result <= 0)
+       {
+           return null;
+       }
+       return customer;
     }
 }
