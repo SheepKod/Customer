@@ -14,6 +14,16 @@ public class CustomerController(CustomerService customerService): ControllerBase
     public async Task<ActionResult<int>> AddCustomer(AddCustomerDTO customer)
     {
         var customerId = await customerService.AddCustomer(customer);
-        return Ok(customerId);
+        return StatusCode(201, customerId);
+    }
+    
+    [HttpDelete]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> DeleteCustomer(int customerId)
+    {
+   
+        return StatusCode(204);
     }
 }
