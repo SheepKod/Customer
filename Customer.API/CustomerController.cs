@@ -9,7 +9,7 @@ namespace Customer.API;
 public class CustomerController(CustomerService customerService): ControllerBase
 {
     [HttpPost]
-    [ProducesResponseType(typeof(IndividualCustomer), 200)]
+    [ProducesResponseType(typeof(int), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<int>> AddCustomer(AddCustomerDTO customer)
