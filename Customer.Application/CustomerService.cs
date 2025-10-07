@@ -21,11 +21,7 @@ public class CustomerService(ICustomerRepository repo)
             CityId = customer.CityId,
             PhoneNumbers = convertedPhoneNumbers,
         };
-       var customerId = await repo.AddCustomer(newCustomer);
-       if (customerId == 0)
-       {
-           throw new CustomerCreationFailedException("There was a problem saving the customer in Database.");
-       }
+        var customerId = await repo.AddCustomer(newCustomer);
       
         return customerId;
        
