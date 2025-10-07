@@ -54,4 +54,46 @@ public class CustomersController(CustomerService customerService): ControllerBas
             return NotFound(ex.Message);
         }
     }
+
+    [HttpPost("relations")]
+    [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(409)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> AddRelation([FromBody] RelationDto relation)
+    {
+        try
+        {
+            var relationId = await customerService.AddRelation(relation);
+            return StatusCode(201,relationId);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (DuplicationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+    
+    [HttpDelete("relations/{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(409)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> DeleteRelation([FromRoute] int id)
+    {
+        try
+        {
+             await customerService.DeleteRelation(id);
+            return StatusCode(204);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }

@@ -1,4 +1,5 @@
 using Customer.Application.Abstractions;
+using Customer.Domain.Enums;
 using Customer.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +27,35 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
         var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.PersonalId == personalId);
         return customer;
     }
+
+    public async Task<int> AddRelation(Relation relation)
+    {
+        var newRelation = await context.AddAsync(relation);
+        await context.SaveChangesAsync();
+        return relation.Id;
+
+    }
+
+    public async Task DeleteRelation(Relation relation)
+    {
+        context.Relations.Remove(relation);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<Relation?> GetRelationById(int relationId)
+    {
+        return await context.Relations.FirstOrDefaultAsync(r => r.Id == relationId);
+    }
     
+    public async Task<bool> RelationExists(int customerId, int relatedCustomerId, RelationType type)
+    {
+        return await context.Relations.AnyAsync(r =>
+            r.CustomerId == customerId &&
+            r.RelatedCustomerId == relatedCustomerId &&
+            r.Type == type);
+    }
+
+
     public async Task<IndividualCustomer?> GetCustomerFullDetailsById(int customerId)
     {
         var customer = await context.RetailCustomers

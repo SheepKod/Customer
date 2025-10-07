@@ -1,6 +1,7 @@
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.Exceptions;
+using Customer.Domain.Enums;
 using Customer.Domain.Models;
 
 namespace Customer.Application;
@@ -52,5 +53,50 @@ public class CustomerService(ICustomerRepository repo)
             Type = dto.Type,
         }).ToList();
     }
+
+    public async Task<int> AddRelation(RelationDto relation)
+    {
+        await EnsureCustomerExists(relation.CustomerId);
+        await EnsureCustomerExists(relation.RelatedCustomerId);
+        await EnsureRelationDoesNotExist(relation.CustomerId, relation.RelatedCustomerId, relation.Type);
+        var newRelation = new Relation
+        {
+            CustomerId = relation.CustomerId,
+            RelatedCustomerId = relation.RelatedCustomerId,
+            Type = relation.Type
+        };
+        var relationId = await repo.AddRelation(newRelation);
+        
+        return relationId;
+    }
+    
+    public async Task DeleteRelation(int relationId)
+    {
+   
+       var relationExists =  await repo.GetRelationById(relationId);
+       if(relationExists == null) throw new NotFoundException($"Relation with ID: {relationId} not found");
+       await repo.DeleteRelation(relationExists);
+    }
+    
+    private async Task EnsureCustomerExists(int customerId)
+    {
+        var customer = await repo.GetCustomerById(customerId);
+        if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
+    }
+    
+    private async Task EnsureRelationDoesNotExist(int customerId, int relatedCustomerId, RelationType type)
+    {
+        var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
+        if (exists) 
+            throw new DuplicationException($"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
+    }
+    
+    private async Task EnsureRelationExist(int customerId, int relatedCustomerId, RelationType type)
+    {
+        var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
+        if (!exists) 
+            throw new NotFoundException($"Relation between {customerId} and {relatedCustomerId} with type {type} does not exists");
+    }
+
     
 }
