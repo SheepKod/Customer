@@ -13,12 +13,12 @@ public class CustomerController(CustomerService customerService): ControllerBase
     [ProducesResponseType(typeof(IndividualCustomer), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
+    [ProducesResponseType(503)]
     public async Task<ActionResult<IndividualCustomer>> AddCustomer(AddCustomerDTO customer)
     {
 
         try
         {
-
             var res = await customerService.AddCustomer(customer);
             return Ok(res);
         }
