@@ -2,7 +2,7 @@ using Customer.Domain.Enums;
 
 namespace Customer.Domain.Models;
 
-public class RetailCustomer
+public class IndividualCustomer
 {
     public int Id { get; init; }
     public string FirstName { get; init; } = string.Empty;

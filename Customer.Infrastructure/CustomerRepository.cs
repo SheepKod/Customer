@@ -8,9 +8,9 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
 {
     
     // TODO: Continue implementation
-    public async Task<RetailCustomer> AddCustomer(AddCustomerDTO customer)
+    public async Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer)
     {
-        var newCustomer = new RetailCustomer
+        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
             LastName = customer.LastName,

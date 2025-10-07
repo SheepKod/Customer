@@ -7,5 +7,5 @@ namespace Customer.Application.Abstractions;
 
 public interface ICustomerRepository
 {
-   public Task<RetailCustomer> AddCustomer(AddCustomerDTO customer);
+   public Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer);
 }

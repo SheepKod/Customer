@@ -6,7 +6,7 @@ namespace Customer.Infrastructure;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): DbContext(opts)
 {
-    public DbSet<RetailCustomer> RetailCustomers { get; set; }
+    public DbSet<IndividualCustomer> RetailCustomers { get; set; }
     public DbSet<PhoneNumber> PhoneNumbers { get; set; }
     public DbSet<Relation> Relations { get; set; }
     public DbSet<City> Cities { get; set; }
@@ -17,32 +17,32 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
     {
         
         // General Restrictions and stuff
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .Property(c=>c.Id)
             .ValueGeneratedOnAdd(); // anu id incrementirdeba axlis damatebisas mara eg xo defaultad isedac mase?
 
         
         // is ro min 2 unda iyos da qartuli an inglisuri asoebi eg business level ariso
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .Property(c => c.FirstName)
             .IsRequired()
             .HasMaxLength(50);
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .Property(c => c.LastName)
             .IsRequired()
             
             .HasMaxLength(50);
 
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .Property(c => c.PersonalId)
             .IsRequired()
             .HasMaxLength(11);
 
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .HasIndex(c => c.PersonalId)
             .IsUnique();
 
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .Property(c => c.DateOfBirth)
             .IsRequired();
 
@@ -52,22 +52,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
 
         
         // Table Relations
-        modelBuilder.Entity<RetailCustomer>()
+        modelBuilder.Entity<IndividualCustomer>()
             .HasOne<City>()  // Veubnebit ro am customers sheesabameba 1 qalaqi
             .WithMany() // veubnebit ro tito qalaqs sheileba bevri customer sheesabamebodes
             .HasForeignKey(c => c.CityId); // foreign key
         modelBuilder.Entity<PhoneNumber>()
-            .HasOne<RetailCustomer>()
+            .HasOne<IndividualCustomer>()
             .WithMany() // es miemarteba retailcustomers
             .HasForeignKey(p => p.CustomerId);
 
         modelBuilder.Entity<Relation>()
-            .HasOne<RetailCustomer>()
+            .HasOne<IndividualCustomer>()
             .WithMany()
             .HasForeignKey(r => r.CustomerId);
         
         modelBuilder.Entity<Relation>()
-            .HasOne<RetailCustomer>()
+            .HasOne<IndividualCustomer>()
             .WithMany()
             .HasForeignKey(r => r.RelatedCustomerId);
         
