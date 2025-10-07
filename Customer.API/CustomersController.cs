@@ -1,5 +1,6 @@
 using Customer.Application;
 using Customer.Application.Dtos;
+using Customer.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Customer.API;
@@ -23,7 +24,15 @@ public class CustomersController(CustomerService customerService): ControllerBas
     [ProducesResponseType(500)]
     public async Task<ActionResult> DeleteCustomer(int customerId)
     {
-        await customerService.DeleteCustomer(customerId);
-        return StatusCode(204);
+        try
+        {
+
+            await customerService.DeleteCustomer(customerId);
+            return StatusCode(204);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
+using Customer.Application.Exceptions;
 using Customer.Domain.Models;
 
 namespace Customer.Application;
@@ -28,7 +29,9 @@ public class CustomerService(ICustomerRepository repo)
     
     public async Task DeleteCustomer(int customerId)
     {
-        await repo.DeleteCustomer(customerId);
+        var customer = await repo.GetCustomerById(customerId);
+        if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
+        await repo.DeleteCustomer(customer);
     }
 
     private List<PhoneNumber> ConvertPhoneNumbers(List<PhoneNumberDTO> phoneNumbers)

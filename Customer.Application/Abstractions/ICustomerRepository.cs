@@ -8,5 +8,6 @@ namespace Customer.Application.Abstractions;
 public interface ICustomerRepository
 {
    public Task<int> AddCustomer(IndividualCustomer customer);
-   public Task DeleteCustomer(int customerId);
+   public Task<IndividualCustomer?> GetCustomerById(int customerId);
+   public Task DeleteCustomer(IndividualCustomer customerId);
 }

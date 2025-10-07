@@ -18,9 +18,14 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
        return newCustomer.Entity.Id;
     }
 
-    public async Task DeleteCustomer(int customerId)
+    public async Task<IndividualCustomer?> GetCustomerById(int customerId)
     {
-        var customer = await context.RetailCustomers.FirstAsync(c => c.Id == customerId);
+        var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.Id == customerId);
+        return customer;
+    }
+
+    public async Task DeleteCustomer(IndividualCustomer customer)
+    {
         context.RetailCustomers.Remove(customer);
         await context.SaveChangesAsync();
     }
