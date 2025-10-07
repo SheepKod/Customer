@@ -1,6 +1,5 @@
 using Customer.Application;
 using Customer.Application.Dtos;
-using Customer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Customer.API;
@@ -9,7 +8,7 @@ namespace Customer.API;
 public class CustomerController(CustomerService customerService): ControllerBase
 {
     [HttpPost]
-    [ProducesResponseType(typeof(int), 200)]
+    [ProducesResponseType(typeof(int), 201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
     public async Task<ActionResult<int>> AddCustomer(AddCustomerDTO customer)
