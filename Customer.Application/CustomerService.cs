@@ -9,6 +9,11 @@ public class CustomerService(ICustomerRepository repo)
 {
     public async Task<IndividualCustomer> AddCustomer(AddCustomerDTO customer)
     {
+        List<PhoneNumber> convertedPhoneNumbers = customer.PhoneNumbers.Select(dto => new PhoneNumber
+        {
+            Number = dto.Number,
+            Type = dto.Type,
+        }).ToList();
        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
@@ -17,7 +22,7 @@ public class CustomerService(ICustomerRepository repo)
             PersonalId = customer.PersonalId,
             DateOfBirth = customer.DateOfBirth,
             CityId = customer.CityId,
-            PhoneNumbers = customer.PhoneNumbers,
+            PhoneNumbers = convertedPhoneNumbers,
         };
        var dbResult = await repo.AddCustomer(newCustomer);
        if (dbResult == null)

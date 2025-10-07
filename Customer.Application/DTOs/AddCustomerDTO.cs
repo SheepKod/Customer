@@ -11,6 +11,6 @@ public class AddCustomerDTO
     public string PersonalId { get; init; } = string.Empty;
     public DateTime DateOfBirth { get; init; }
     public int CityId { get; init; }
-    public List<PhoneNumber> PhoneNumbers { get; set; } = [];
+    public List<PhoneNumberDTO> PhoneNumbers { get; set; } = [];
     public string ImagePath { get; init; } = string.Empty;
 }
