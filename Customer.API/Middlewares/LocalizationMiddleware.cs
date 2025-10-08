@@ -14,10 +14,12 @@ public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMi
         if (SupportedCultures.Contains(requestedCulture))
         {
             culture = new CultureInfo(requestedCulture);
+            
         }
         
         CultureInfo.CurrentCulture = culture;
         CultureInfo.CurrentUICulture = culture;
+        logger.LogInformation($"Culture set to {culture.Name}");
         
         await next(context);
     }
