@@ -108,6 +108,21 @@ public class CustomerService(ICustomerRepository repo)
        await repo.DeleteRelation(relationExists);
     }
     
+    public async Task<List<RelationReport>> GetRelationReport(int customerId)
+    {
+   
+        var customer =  await repo.GetCustomerFullDetailsById(customerId);
+        if(customer == null) throw new NotFoundException($"Relation with ID: {customerId} not found");
+        var relationReport = customer.Relations.GroupBy(r=> r.Type)
+            .Select(g=> new RelationReport
+            {
+                Type = g.Key,
+                Count = g.Count()
+            }).ToList();
+        
+        return relationReport;
+    }
+    
     
     // Helper Methods might move to a different class
     private async Task EnsureCustomerExists(int customerId)

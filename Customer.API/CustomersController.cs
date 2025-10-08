@@ -129,4 +129,22 @@ public class CustomersController(CustomerService customerService): ControllerBas
             return NotFound(ex.Message);
         }
     }
+
+    [HttpGet("{Id}/Relations")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int customerId)
+    {
+        try
+        {
+            var report = await customerService.GetRelationReport(customerId);
+            return StatusCode(200, report);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 }
