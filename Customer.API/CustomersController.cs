@@ -19,7 +19,7 @@ public class CustomersController(CustomerService customerService): ControllerBas
         return StatusCode(201, customerId);
     }
     
-    [HttpDelete("{customerId}")]
+    [HttpDelete("{Id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -56,7 +56,7 @@ public class CustomersController(CustomerService customerService): ControllerBas
         }
     }
     
-    [HttpGet("{customerId}")]
+    [HttpGet("{Id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -110,7 +110,7 @@ public class CustomersController(CustomerService customerService): ControllerBas
         }
     }
     
-    [HttpDelete("Relations/{id}")]
+    [HttpDelete("Relations/{Id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
