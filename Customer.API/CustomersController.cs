@@ -1,5 +1,6 @@
 using Customer.Application;
 using Customer.Application.Dtos;
+using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
 using Customer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -74,15 +75,15 @@ public class CustomersController(CustomerService customerService): ControllerBas
         }
     }
     
-    [HttpGet("QuickSearch")]
+    [HttpPost("Search")]
     [ProducesResponseType(typeof(PagedResult<IndividualCustomer>), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch([FromQuery] CustomerQuickSearchDTO customerQuickSearchDto, [FromQuery] PagingDTO pagingDto)
+    public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch([FromBody] CustomerDetailedSearchDTO customerDto, [FromQuery] PagingDTO pagingDto)
     {
       
-        var results = await customerService.QuickSearchCustomers
-                (customerQuickSearchDto, pagingDto);
+        var results = await customerService.SearchCustomers
+                (customerDto, pagingDto);
         return Ok(results);
        
     }

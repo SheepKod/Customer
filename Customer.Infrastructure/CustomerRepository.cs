@@ -1,5 +1,6 @@
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
+using Customer.Application.DTOs;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +49,7 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
         return await context.Relations.FirstOrDefaultAsync(r => r.Id == relationId);
     }
 
-    public async Task<PagedResult<IndividualCustomer>> QuickSearchCustomers(CustomerQuickSearchDTO search, PagingDTO paging)
+    public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search, PagingDTO paging)
     {
         var query = context.RetailCustomers.AsQueryable().AsNoTracking();
         
@@ -58,7 +59,22 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
             query = query.Where(c => EF.Functions.Like(c.LastName, $"%{search.LastName}%"));
         if(!string.IsNullOrWhiteSpace(search.PersonalId))
             query = query.Where(c => EF.Functions.Like(c.PersonalId, $"%{search.PersonalId}%"));
+        if(search.CustomerId.HasValue)
+            query = query.Where(c => c.Id == search.CustomerId);
+        if(search.Gender.HasValue)
+            query = query.Where(c => c.Gender == search.Gender);
+        if(search.DateOfBirth.HasValue)
+            query = query.Where(c => c.DateOfBirth == search.DateOfBirth);
+        if(search.CityId.HasValue)
+            query = query.Where(c => c.CityId == search.CityId);
+        if(search.RelationType.HasValue)
+            query = query.Where(c => c.Relations.Any(r => r.Type == search.RelationType));
+        if (!string.IsNullOrWhiteSpace(search.PhoneNumber))
+            query = query.Where(c => c.PhoneNumbers.Any(p => p.Number == search.PhoneNumber));
+        if (search.PhoneType.HasValue)
+            query = query.Where(c => c.PhoneNumbers.Any(p => p.Type == search.PhoneType));
         
+                
         
         var totalCount = await query.CountAsync();
 

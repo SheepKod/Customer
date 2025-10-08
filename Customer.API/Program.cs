@@ -1,3 +1,5 @@
+using Customer.API.Middlewares;
+using Customer.Application;
 using Customer.Application.Abstractions;
 using Customer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(dbContextBuilder=>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<CustomerService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,7 +27,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.UseHttpsRedirection();
-
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 
 app.Run();

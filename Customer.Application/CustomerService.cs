@@ -1,5 +1,6 @@
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
+using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
@@ -61,9 +62,9 @@ public class CustomerService(ICustomerRepository repo)
         await repo.DeleteCustomer(customer);
     }
 
-    public async Task<PagedResult<IndividualCustomer>> QuickSearchCustomers(CustomerQuickSearchDTO search, PagingDTO paging)
+    public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search, PagingDTO paging)
     {
-        return await repo.QuickSearchCustomers(search, paging);
+        return await repo.SearchCustomers(search, paging);
     }
 
 
