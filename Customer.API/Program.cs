@@ -14,6 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(dbContextBuilder=>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+// ამას ინტერფეისი ხომ არ გავუკეთო?
 builder.Services.AddScoped<CustomerService>();
 var app = builder.Build();
 
@@ -25,9 +27,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapControllers();
-app.UseHttpsRedirection();
+app.UseMiddleware<LocalizationMiddleware>();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseHttpsRedirection();
+app.MapControllers();
 
 
 app.Run();
