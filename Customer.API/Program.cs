@@ -1,7 +1,9 @@
+using Customer.API.ActionFilters;
 using Customer.API.Middlewares;
 using Customer.Application;
 using Customer.Application.Abstractions;
 using Customer.Infrastructure;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,9 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
 builder.Services.AddDbContext<ApplicationDbContext>(dbContextBuilder=>
     dbContextBuilder.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
-builder.Services.AddControllers();
+builder.Services.AddControllers(opts =>
+{
+    opts.Filters.Add<ValidationActionFilter>();
+});
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 

@@ -18,6 +18,11 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
        return newCustomer.Entity.Id;
     }
 
+    public async Task<City?> GetCityById(int cityId)
+    {
+        return await context.Cities.FirstOrDefaultAsync(c => c.Id == cityId);
+    }
+
     public async Task<IndividualCustomer?> GetCustomerById(int customerId)
     {
         var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.Id == customerId);
@@ -67,6 +72,8 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
             query = query.Where(c => c.DateOfBirth == search.DateOfBirth);
         if(search.CityId.HasValue)
             query = query.Where(c => c.CityId == search.CityId);
+        if(search.RelatedCustomerId.HasValue)
+            query = query.Where(c => c.Relations.Any(r => r.RelatedCustomerId == search.RelatedCustomerId));
         if(search.RelationType.HasValue)
             query = query.Where(c => c.Relations.Any(r => r.Type == search.RelationType));
         if (!string.IsNullOrWhiteSpace(search.PhoneNumber))

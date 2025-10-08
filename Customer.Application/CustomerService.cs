@@ -12,7 +12,8 @@ public class CustomerService(ICustomerRepository repo)
     public async Task<int> AddCustomer(AddCustomerDTO customer)
     { 
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
-        
+        var city =  await repo.GetCityById(customer.CityId);
+        if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
@@ -45,7 +46,12 @@ public class CustomerService(ICustomerRepository repo)
         
         if (updatedCustomerData.DateOfBirth.HasValue) customer.DateOfBirth = updatedCustomerData.DateOfBirth.Value;
         
-        if(updatedCustomerData.CityId.HasValue) customer.CityId = updatedCustomerData.CityId.Value;
+        if(updatedCustomerData.CityId.HasValue)
+        {
+            var city =  await repo.GetCityById(customer.CityId);
+            if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
+            customer.CityId = updatedCustomerData.CityId.Value;
+        };
         
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {
