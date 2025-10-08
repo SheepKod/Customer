@@ -20,7 +20,6 @@ public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMi
 
         try
         {
-
             var culture = new CultureInfo(cultureLang);
 
             CultureInfo.CurrentCulture = culture;
@@ -33,7 +32,7 @@ public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMi
             CultureInfo.CurrentCulture = fallbackCulture;
             CultureInfo.CurrentUICulture = fallbackCulture;
 
-            logger.LogWarning(ex.Message);
+            logger.LogWarning($"Falling Back To Default Language,Requested Culture Not Supported : {requestedCulture} {ex.Message}");
         }
         
         await next(context);
