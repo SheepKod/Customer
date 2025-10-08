@@ -1,6 +1,7 @@
 using Customer.Application;
 using Customer.Application.Dtos;
 using Customer.Application.Exceptions;
+using Customer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Customer.API;
@@ -72,8 +73,21 @@ public class CustomersController(CustomerService customerService): ControllerBas
             return NotFound(ex.Message);
         }
     }
+    
+    [HttpGet("QuickSearch")]
+    [ProducesResponseType(typeof(PagedResult<IndividualCustomer>), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch([FromQuery] CustomerQuickSearchDTO customerQuickSearchDto, [FromQuery] PagingDTO pagingDto)
+    {
+      
+        var results = await customerService.QuickSearchCustomers
+                (customerQuickSearchDto, pagingDto);
+        return Ok(results);
+       
+    }
 
-    [HttpPost("relations")]
+    [HttpPost("Relations")]
     [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -96,7 +110,7 @@ public class CustomersController(CustomerService customerService): ControllerBas
         }
     }
     
-    [HttpDelete("relations/{id}")]
+    [HttpDelete("Relations/{id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]

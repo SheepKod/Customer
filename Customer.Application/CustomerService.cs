@@ -61,6 +61,12 @@ public class CustomerService(ICustomerRepository repo)
         await repo.DeleteCustomer(customer);
     }
 
+    public async Task<PagedResult<IndividualCustomer>> QuickSearchCustomers(CustomerQuickSearchDTO search, PagingDTO paging)
+    {
+        return await repo.QuickSearchCustomers(search, paging);
+    }
+
+
     public async Task<IndividualCustomer?> GetCustomerById(int customerId)
     {
         var customer = await repo.GetCustomerById(customerId);

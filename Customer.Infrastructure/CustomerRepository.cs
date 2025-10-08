@@ -1,4 +1,5 @@
 using Customer.Application.Abstractions;
+using Customer.Application.Dtos;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,33 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
     public async Task<Relation?> GetRelationById(int relationId)
     {
         return await context.Relations.FirstOrDefaultAsync(r => r.Id == relationId);
+    }
+
+    public async Task<PagedResult<IndividualCustomer>> QuickSearchCustomers(CustomerQuickSearchDTO search, PagingDTO paging)
+    {
+        var query = context.RetailCustomers.AsQueryable().AsNoTracking();
+        
+        if(!string.IsNullOrWhiteSpace(search.FirstName))
+            query = query.Where(c => EF.Functions.Like(c.FirstName, $"%{search.FirstName}%"));;
+        if(!string.IsNullOrWhiteSpace(search.LastName))
+            query = query.Where(c => EF.Functions.Like(c.LastName, $"%{search.LastName}%"));
+        if(!string.IsNullOrWhiteSpace(search.PersonalId))
+            query = query.Where(c => EF.Functions.Like(c.PersonalId, $"%{search.PersonalId}%"));
+        
+        
+        var totalCount = await query.CountAsync();
+
+        var customersFound = await query
+            .Skip((paging.PageNumber - 1) * paging.PageSize)
+            .Take(paging.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<IndividualCustomer>
+        {
+            TotalCount = totalCount,
+            Results = customersFound
+        };
+
     }
 
     public async Task SaveChangesAsync()

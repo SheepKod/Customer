@@ -18,6 +18,7 @@ public interface ICustomerRepository
    public Task<bool> RelationExists(int customerId, int relatedCustomerId, RelationType type);
    public Task DeleteRelation(Relation relation);
    public Task<Relation?> GetRelationById(int relationId);
+   public Task<PagedResult<IndividualCustomer>> QuickSearchCustomers(CustomerQuickSearchDTO search, PagingDTO paging);
    
    public Task SaveChangesAsync();
 
