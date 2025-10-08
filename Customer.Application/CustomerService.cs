@@ -73,8 +73,15 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
 
     public async Task UploadImage(int customerId, IFormFile image)
     {
+        // bucket name unda gavitano samde readonly constanshi
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
+        if (customer.ImageKey != Guid.Empty)
+        {
+            await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}.jpg");
+            customer.ImageKey = Guid.Empty;
+            await repo.SaveChangesAsync();
+        }
         var fileKey = Guid.NewGuid();
         await using (var stream = image.OpenReadStream())
         {
