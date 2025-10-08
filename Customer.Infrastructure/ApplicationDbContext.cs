@@ -72,7 +72,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
             .HasForeignKey(r => r.RelatedCustomerId);
         
         // Seeding
-        modelBuilder.Entity<City>().HasData(CitiesData.Cities);
+        modelBuilder.Entity<City>().HasData(CustomersData.Cities);
 
     }
 }

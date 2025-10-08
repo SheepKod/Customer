@@ -1,3 +1,5 @@
+using Amazon.S3;
+using Amazon.S3.Model;
 using Customer.Application;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
@@ -8,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Customer.API;
 [ApiController]
 [Route("api/v1/[controller]")]
-public class CustomersController(CustomerService customerService): ControllerBase
+public class CustomersController(CustomerService customerService, IAmazonS3 amazonS3): ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(typeof(int), 201)]
@@ -146,5 +148,17 @@ public class CustomersController(CustomerService customerService): ControllerBas
         {
             return NotFound(ex.Message);
         }
+    }
+
+    [HttpPost("{id}/Upload")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> UploadImage([FromRoute] int id, [FromForm] IFormFile image)
+    {
+        await customerService.UploadImage(id, image);
+        
+        return Created();
     }
 }

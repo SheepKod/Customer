@@ -1,13 +1,16 @@
+using Amazon.S3;
+using Amazon.S3.Model;
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Customer.Application;
 
-public class CustomerService(ICustomerRepository repo)
+public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
 {
     public async Task<int> AddCustomer(AddCustomerDTO customer)
     { 
@@ -66,6 +69,26 @@ public class CustomerService(ICustomerRepository repo)
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
         await repo.DeleteCustomer(customer);
+    }
+
+    public async Task UploadImage(int customerId, IFormFile image)
+    {
+        var customer = await repo.GetCustomerById(customerId);
+        if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
+        var fileKey = Guid.NewGuid();
+        await using (var stream = image.OpenReadStream())
+        {
+            var request = new PutObjectRequest
+            {
+                BucketName = "tbc-customer-img",
+                Key = $"{fileKey}.jpg",
+                InputStream = stream,
+                ContentType = image.ContentType
+            };
+            await amazonS3.PutObjectAsync(request);
+        }
+        customer.ImageKey = fileKey;
+        await repo.SaveChangesAsync();
     }
 
     public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search, PagingDTO paging)

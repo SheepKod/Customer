@@ -1,3 +1,4 @@
+using Amazon.S3;
 using Customer.API.ActionFilters;
 using Customer.API.Middlewares;
 using Customer.Application;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
 builder.Services.AddDbContext<ApplicationDbContext>(dbContextBuilder=>
     dbContextBuilder.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
