@@ -37,6 +37,24 @@ public class CustomersController(CustomerService customerService): ControllerBas
         }
     }
     
+    [HttpPatch]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> UpdateCustomer([FromBody] UpdateCustomerDTO updatedCustomerData)
+    {
+        try
+        {
+            await customerService.UpdateCustomer(updatedCustomerData);
+            return StatusCode(204);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+    
     [HttpGet("{customerId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -61,11 +79,11 @@ public class CustomersController(CustomerService customerService): ControllerBas
     [ProducesResponseType(404)]
     [ProducesResponseType(409)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> AddRelation([FromBody] RelationDto relation)
+    public async Task<IActionResult> AddRelation([FromBody] AddRelationDTO addRelation)
     {
         try
         {
-            var relationId = await customerService.AddRelation(relation);
+            var relationId = await customerService.AddRelation(addRelation);
             return StatusCode(201,relationId);
         }
         catch (NotFoundException ex)

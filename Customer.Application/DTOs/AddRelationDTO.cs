@@ -2,7 +2,7 @@ using Customer.Domain.Enums;
 
 namespace Customer.Application.Dtos;
 
-public class RelationDto
+public class AddRelationDTO
 {
     public int CustomerId { get; set; }
     public int RelatedCustomerId { get; set; }

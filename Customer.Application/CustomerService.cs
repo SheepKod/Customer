@@ -9,10 +9,7 @@ namespace Customer.Application;
 public class CustomerService(ICustomerRepository repo)
 {
     public async Task<int> AddCustomer(AddCustomerDTO customer)
-    {
-        var customerExists = await repo.GetCustomerByPersonalId(customer.PersonalId);
-        if (customerExists != null) throw new DuplicationException($"Customer with Personal ID: {customer.PersonalId} already exists");
-       
+    { 
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
         
        var newCustomer = new IndividualCustomer
@@ -29,6 +26,34 @@ public class CustomerService(ICustomerRepository repo)
       
         return customerId;
        
+    }
+
+    public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData)
+    {
+        var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId);
+        if (customer == null) throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
+        if(updatedCustomerData.FirstName != null) customer.FirstName = updatedCustomerData.FirstName;
+        if (updatedCustomerData.PersonalId != null) customer.PersonalId = updatedCustomerData.PersonalId;
+        if(updatedCustomerData.LastName != null) customer.LastName = updatedCustomerData.LastName;
+        // why do i need has value here
+        if(updatedCustomerData.Gender.HasValue) customer.Gender = updatedCustomerData.Gender.Value;
+        if (updatedCustomerData.DateOfBirth.HasValue) customer.DateOfBirth = updatedCustomerData.DateOfBirth.Value;
+        if(updatedCustomerData.CityId.HasValue) customer.CityId = updatedCustomerData.CityId.Value;
+        if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
+        {
+            foreach (var phoneNumber in updatedCustomerData.PhoneNumbers)
+            {
+                var phoneNumberExists = customer.PhoneNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
+                
+                // aq tu ar arsebobs es nomeri mivamato rogorc axali tu error davurtya
+                // me mgonia ro raxan update xdeba ar unda ematebodes axali nomeri tu id ar gamoayola
+                if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
+                phoneNumberExists.Number = phoneNumber.Number;
+                phoneNumberExists.Type = phoneNumber.Type;
+            }
+        }
+
+        await repo.SaveChangesAsync();
     }
     
     public async Task DeleteCustomer(int customerId)
@@ -54,16 +79,16 @@ public class CustomerService(ICustomerRepository repo)
         }).ToList();
     }
 
-    public async Task<int> AddRelation(RelationDto relation)
+    public async Task<int> AddRelation(AddRelationDTO addRelation)
     {
-        await EnsureCustomerExists(relation.CustomerId);
-        await EnsureCustomerExists(relation.RelatedCustomerId);
-        await EnsureRelationDoesNotExist(relation.CustomerId, relation.RelatedCustomerId, relation.Type);
+        await EnsureCustomerExists(addRelation.CustomerId);
+        await EnsureCustomerExists(addRelation.RelatedCustomerId);
+        await EnsureRelationDoesNotExist(addRelation.CustomerId, addRelation.RelatedCustomerId, addRelation.Type);
         var newRelation = new Relation
         {
-            CustomerId = relation.CustomerId,
-            RelatedCustomerId = relation.RelatedCustomerId,
-            Type = relation.Type
+            CustomerId = addRelation.CustomerId,
+            RelatedCustomerId = addRelation.RelatedCustomerId,
+            Type = addRelation.Type
         };
         var relationId = await repo.AddRelation(newRelation);
         
@@ -78,6 +103,8 @@ public class CustomerService(ICustomerRepository repo)
        await repo.DeleteRelation(relationExists);
     }
     
+    
+    // Helper Methods might move to a different class
     private async Task EnsureCustomerExists(int customerId)
     {
         var customer = await repo.GetCustomerById(customerId);

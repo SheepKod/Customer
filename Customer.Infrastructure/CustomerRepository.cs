@@ -46,7 +46,12 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
     {
         return await context.Relations.FirstOrDefaultAsync(r => r.Id == relationId);
     }
-    
+
+    public async Task SaveChangesAsync()
+    {
+        await context.SaveChangesAsync();
+    }
+
     public async Task<bool> RelationExists(int customerId, int relatedCustomerId, RelationType type)
     {
         return await context.Relations.AnyAsync(r =>
