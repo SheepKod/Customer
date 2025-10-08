@@ -14,11 +14,6 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
             context.Response.StatusCode = 400;
             logger.LogError(ex.Message);
         }
-        catch (ArgumentNullException ex)
-        {
-            context.Response.StatusCode = 500;
-            logger.LogError(ex.Message);
-        }
         catch (Exception ex)
         {
             context.Response.StatusCode = 500;

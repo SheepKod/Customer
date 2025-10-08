@@ -29,6 +29,8 @@ builder.Services.AddScoped<CustomerService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -37,7 +39,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<LocalizationMiddleware>();
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.MapControllers();
 
