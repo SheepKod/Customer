@@ -10,16 +10,31 @@ public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMi
     public async Task InvokeAsync(HttpContext context)
     {
         var requestedCulture = context.Request.Headers["Accept-Language"].ToString();
-        var culture = new CultureInfo(DefaultCulture);
+        var cultureLang = DefaultCulture;
         if (SupportedCultures.Contains(requestedCulture))
         {
-            culture = new CultureInfo(requestedCulture);
+            
+            cultureLang = requestedCulture;
             
         }
-        
-        CultureInfo.CurrentCulture = culture;
-        CultureInfo.CurrentUICulture = culture;
-        logger.LogInformation($"Culture set to {culture.Name}");
+
+        try
+        {
+
+            var culture = new CultureInfo(cultureLang);
+
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+            logger.LogInformation($"Culture set to {culture.Name}");
+        }
+        catch (CultureNotFoundException ex)
+        {
+            var fallbackCulture = new CultureInfo(DefaultCulture);
+            CultureInfo.CurrentCulture = fallbackCulture;
+            CultureInfo.CurrentUICulture = fallbackCulture;
+
+            logger.LogWarning(ex.Message);
+        }
         
         await next(context);
     }
