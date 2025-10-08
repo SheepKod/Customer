@@ -31,26 +31,24 @@ public class CustomerService(ICustomerRepository repo)
     public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData)
     {
         var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId);
+        
         if (customer == null) throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
+        
         if(updatedCustomerData.FirstName != null) customer.FirstName = updatedCustomerData.FirstName;
+        
         if (updatedCustomerData.PersonalId != null) customer.PersonalId = updatedCustomerData.PersonalId;
+        
         if(updatedCustomerData.LastName != null) customer.LastName = updatedCustomerData.LastName;
-        // why do i need has value here
+        
         if(updatedCustomerData.Gender.HasValue) customer.Gender = updatedCustomerData.Gender.Value;
+        
         if (updatedCustomerData.DateOfBirth.HasValue) customer.DateOfBirth = updatedCustomerData.DateOfBirth.Value;
+        
         if(updatedCustomerData.CityId.HasValue) customer.CityId = updatedCustomerData.CityId.Value;
+        
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {
-            foreach (var phoneNumber in updatedCustomerData.PhoneNumbers)
-            {
-                var phoneNumberExists = customer.PhoneNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
-                
-                // aq tu ar arsebobs es nomeri mivamato rogorc axali tu error davurtya
-                // me mgonia ro raxan update xdeba ar unda ematebodes axali nomeri tu id ar gamoayola
-                if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
-                phoneNumberExists.Number = phoneNumber.Number;
-                phoneNumberExists.Type = phoneNumber.Type;
-            }
+            UpdatePhoneNumbers(customer.PhoneNumbers, updatedCustomerData.PhoneNumbers);
         }
 
         await repo.SaveChangesAsync();
@@ -123,6 +121,20 @@ public class CustomerService(ICustomerRepository repo)
         var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
         if (!exists) 
             throw new NotFoundException($"Relation between {customerId} and {relatedCustomerId} with type {type} does not exists");
+    }
+
+    private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<PhoneNumber> incomingNumbers)
+    {
+        foreach (var phoneNumber in incomingNumbers)
+        {
+            var phoneNumberExists = existingNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
+                
+            // aq tu ar arsebobs es nomeri mivamato rogorc axali tu error davurtya
+            // me mgonia ro raxan update xdeba ar unda ematebodes axali nomeri tu id ar gamoayola
+            if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
+            phoneNumberExists.Number = phoneNumber.Number;
+            phoneNumberExists.Type = phoneNumber.Type;
+        }
     }
 
     
