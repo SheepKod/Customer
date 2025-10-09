@@ -88,7 +88,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             var request = new PutObjectRequest
             {
                 BucketName = "tbc-customer-img",
-                Key = $"{fileKey}.jpg",
+                Key = fileKey.ToString(),
                 InputStream = stream,
                 ContentType = image.ContentType
             };
