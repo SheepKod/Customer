@@ -5,7 +5,7 @@ namespace Customer.API.Middlewares;
 
 public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMiddleware> logger)
 {
-    private IReadOnlySet<string> SupportedCultures => new HashSet<string> { "ka", "en", "ru", "ge" }; 
+    private IReadOnlySet<string> SupportedCultures => new HashSet<string> { "ka", "en", "ru", "ge" };
 
     private const string DefaultCulture = "ka";
     
