@@ -58,19 +58,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
             .HasForeignKey(c => c.CityId); // foreign key
         modelBuilder.Entity<PhoneNumber>()
             .HasOne<IndividualCustomer>()
-            .WithMany() // es miemarteba retailcustomers
+            .WithMany(x=> x.PhoneNumbers) // es miemarteba retailcustomers
             .HasForeignKey(p => p.IndividualCustomerId);
-
-        modelBuilder.Entity<Relation>()
-            .HasOne<IndividualCustomer>()
-            .WithMany()
-            .HasForeignKey(r => r.IndividualCustomerId);
-        
+            
         modelBuilder.Entity<Relation>()
             .HasOne<IndividualCustomer>()
             .WithMany()
             .HasForeignKey(r => r.RelatedCustomerId)
-            .OnDelete(DeleteBehavior.Restrict);;
+            .OnDelete(DeleteBehavior.Restrict);
         
         // Seeding
         modelBuilder.Entity<City>().HasData(CustomersData.Cities);
