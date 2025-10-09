@@ -37,58 +37,5 @@ public static class CustomersData
         new() { Id = 14, Name = "Sydney", Country = "Australia" },
         new() { Id = 15, Name = "Melbourne", Country = "Australia" },
     ];
-    
-    public static readonly List<IndividualCustomer> Customers = new()
-    {
-        new IndividualCustomer
-        {
-            Id = 1,
-            FirstName = "Marry",
-            LastName = "KOP",
-            Gender = Gender.Female,
-            PersonalId = "01001002144",
-            DateOfBirth = new DateTime(1995, 12, 10),
-            CityId = 1,
-            ImageKey = Guid.NewGuid()
-        },
-        new IndividualCustomer
-        {
-            Id = 2,
-            FirstName = "Tun",
-            LastName = "Sahur",
-            Gender = Gender.Male,
-            PersonalId = "01001002145",
-            DateOfBirth = new DateTime(1992, 6, 17),
-            CityId = 2,
-            ImageKey = Guid.NewGuid()
-        }
-    };
-
-    public static readonly List<PhoneNumber> PhoneNumbers = new()
-    {
-        new PhoneNumber { Id = 1, Number = "555111222", Type = PhoneType.Mobile, CustomerId = 1 },
-        new PhoneNumber { Id = 2, Number = "322123456", Type = PhoneType.Home, CustomerId = 1 },
-        new PhoneNumber { Id = 3, Number = "555333444", Type = PhoneType.Mobile, CustomerId = 2 }
-    };
-
-    public static readonly List<Relation> Relations = new()
-    {
-        // Nino is a colleague of Giorgi
-        new Relation
-        {
-            Id = 1,
-            CustomerId = 1,
-            RelatedCustomerId = 2,
-            Type = RelationType.Colleague
-        },
-        // Giorgi is an acquaintance of Nino
-        new Relation
-        {
-            Id = 2,
-            CustomerId = 2,
-            RelatedCustomerId = 1,
-            Type = RelationType.Acquaintance
-        }
-    };
 
 }
