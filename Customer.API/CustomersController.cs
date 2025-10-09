@@ -1,3 +1,4 @@
+using Amazon.S3;
 using Customer.Application;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
@@ -115,8 +116,16 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     [ProducesResponseType(500)]
     public async Task<IActionResult> UploadImage([FromRoute] int id, [FromForm] IFormFile image)
     {
-        await customerService.UploadImage(id, image);
+        try
+        {
 
-        return Created();
+            await customerService.UploadImage(id, image);
+
+            return Created();
+        }
+        catch (AmazonS3Exception ex) when(ex.ErrorCode == StatusCodes.Status404NotFound.ToString())
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

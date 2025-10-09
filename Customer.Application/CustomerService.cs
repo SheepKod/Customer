@@ -78,7 +78,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
         if (customer.ImageKey != Guid.Empty)
         {
-            await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}.jpg");
+            await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
             customer.ImageKey = Guid.Empty;
             await repo.SaveChangesAsync();
         }
