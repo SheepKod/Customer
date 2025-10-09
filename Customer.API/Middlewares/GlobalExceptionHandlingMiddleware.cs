@@ -1,3 +1,5 @@
+using Customer.Application.Exceptions;
+
 namespace Customer.API.Middlewares;
 
 public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
@@ -8,6 +10,11 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
         try
         {
             await next(context);
+        }
+        catch (NotFoundException ex)
+        {
+            context.Response.StatusCode = 404;
+            logger.LogError(ex.Message);
         }
         catch (Exception ex)
         {

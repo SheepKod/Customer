@@ -1,5 +1,3 @@
-using Amazon.S3;
-using Amazon.S3.Model;
 using Customer.Application;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
@@ -8,9 +6,10 @@ using Customer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Customer.API;
+
 [ApiController]
 [Route("api/v1/[controller]")]
-public class CustomersController(CustomerService customerService, IAmazonS3 amazonS3): ControllerBase
+public class CustomersController(CustomerService customerService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(typeof(int), 201)]
@@ -21,7 +20,7 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
         var customerId = await customerService.AddCustomer(customer);
         return StatusCode(201, customerId);
     }
-    
+
     [HttpDelete("{Id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -29,18 +28,10 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     [ProducesResponseType(500)]
     public async Task<ActionResult> DeleteCustomer([FromRoute] int customerId)
     {
-        try
-        {
-
-            await customerService.DeleteCustomer(customerId);
-            return StatusCode(204);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await customerService.DeleteCustomer(customerId);
+        return StatusCode(204);
     }
-    
+
     [HttpPatch]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -48,17 +39,10 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     [ProducesResponseType(500)]
     public async Task<ActionResult> UpdateCustomer([FromBody] UpdateCustomerDTO updatedCustomerData)
     {
-        try
-        {
-            await customerService.UpdateCustomer(updatedCustomerData);
-            return StatusCode(204);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await customerService.UpdateCustomer(updatedCustomerData);
+        return StatusCode(204);
     }
-    
+
     [HttpGet("{Id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -66,28 +50,20 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     [ProducesResponseType(500)]
     public async Task<ActionResult> GetCustomerById([FromRoute] int customerId)
     {
-        try
-        {
-            var customer = await customerService.GetCustomerById(customerId);
-            return Ok(customer);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var customer = await customerService.GetCustomerById(customerId);
+        return Ok(customer);
     }
-    
+
     [HttpPost("Search")]
     [ProducesResponseType(typeof(PagedResult<IndividualCustomer>), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch([FromBody] CustomerDetailedSearchDTO customerDto, [FromQuery] PagingDTO pagingDto)
+    public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch(
+        [FromBody] CustomerDetailedSearchDTO customerDto, [FromQuery] PagingDTO pagingDto)
     {
-      
         var results = await customerService.SearchCustomers
-                (customerDto, pagingDto);
+            (customerDto, pagingDto);
         return Ok(results);
-       
     }
 
     [HttpPost("Relations")]
@@ -101,18 +77,14 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
         try
         {
             var relationId = await customerService.AddRelation(addRelation);
-            return StatusCode(201,relationId);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            return StatusCode(201, relationId);
         }
         catch (DuplicationException ex)
         {
             return Conflict(ex.Message);
         }
     }
-    
+
     [HttpDelete("Relations/{Id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -121,15 +93,8 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     [ProducesResponseType(500)]
     public async Task<IActionResult> DeleteRelation([FromRoute] int id)
     {
-        try
-        {
-             await customerService.DeleteRelation(id);
-            return StatusCode(204);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await customerService.DeleteRelation(id);
+        return StatusCode(204);
     }
 
     [HttpGet("{Id}/Relations")]
@@ -139,15 +104,8 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     [ProducesResponseType(500)]
     public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int customerId)
     {
-        try
-        {
-            var report = await customerService.GetRelationReport(customerId);
-            return StatusCode(200, report);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var report = await customerService.GetRelationReport(customerId);
+        return StatusCode(200, report);
     }
 
     [HttpPost("{id}/Upload")]
@@ -158,7 +116,7 @@ public class CustomersController(CustomerService customerService, IAmazonS3 amaz
     public async Task<IActionResult> UploadImage([FromRoute] int id, [FromForm] IFormFile image)
     {
         await customerService.UploadImage(id, image);
-        
+
         return Created();
     }
 }
