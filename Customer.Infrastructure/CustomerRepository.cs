@@ -106,7 +106,7 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
     public async Task<bool> RelationExists(int customerId, int relatedCustomerId, RelationType type)
     {
         return await context.Relations.AnyAsync(r =>
-            r.CustomerId == customerId &&
+            r.IndividualCustomerId == customerId &&
             r.RelatedCustomerId == relatedCustomerId &&
             r.Type == type);
     }

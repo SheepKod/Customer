@@ -59,17 +59,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> opts): 
         modelBuilder.Entity<PhoneNumber>()
             .HasOne<IndividualCustomer>()
             .WithMany() // es miemarteba retailcustomers
-            .HasForeignKey(p => p.CustomerId);
+            .HasForeignKey(p => p.IndividualCustomerId);
 
         modelBuilder.Entity<Relation>()
             .HasOne<IndividualCustomer>()
             .WithMany()
-            .HasForeignKey(r => r.CustomerId);
+            .HasForeignKey(r => r.IndividualCustomerId);
         
         modelBuilder.Entity<Relation>()
             .HasOne<IndividualCustomer>()
             .WithMany()
-            .HasForeignKey(r => r.RelatedCustomerId);
+            .HasForeignKey(r => r.RelatedCustomerId)
+            .OnDelete(DeleteBehavior.Restrict);;
         
         // Seeding
         modelBuilder.Entity<City>().HasData(CustomersData.Cities);

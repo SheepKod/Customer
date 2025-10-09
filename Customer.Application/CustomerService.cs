@@ -127,7 +127,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         await EnsureRelationDoesNotExist(addRelation.CustomerId, addRelation.RelatedCustomerId, addRelation.Type);
         var newRelation = new Relation
         {
-            CustomerId = addRelation.CustomerId,
+            IndividualCustomerId = addRelation.CustomerId,
             RelatedCustomerId = addRelation.RelatedCustomerId,
             Type = addRelation.Type
         };

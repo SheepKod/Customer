@@ -109,17 +109,16 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         return StatusCode(200, report);
     }
 
-    [HttpPost("{id}/Upload")]
-    [ProducesResponseType(200)]
+    [HttpPost("Image")]
+    [ProducesResponseType(201)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> UploadImage([FromRoute] int id, [FromForm] IFormFile image)
+    public async Task<IActionResult> UploadImage([FromForm] UploadImageDto uploadImageDto)
     {
         try
         {
-
-            await customerService.UploadImage(id, image);
+            await customerService.UploadImage(uploadImageDto.CustomerId, uploadImageDto.Image);
 
             return Created();
         }

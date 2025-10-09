@@ -13,5 +13,5 @@ public class IndividualCustomer
     public int CityId { get; set; }
     public List<PhoneNumber> PhoneNumbers { get; set; } = [];
     public List<Relation> Relations { get; set; } = [];
-    public Guid ImageKey { get; set; }
+    public Guid? ImageKey { get; set; }
 }
