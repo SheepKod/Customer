@@ -1,3 +1,4 @@
+using Customer.API.ResponseModels;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -30,7 +31,17 @@ public class ValidationActionFilter(IServiceProvider serviceProvider) : IActionF
         }
         if (!context.ModelState.IsValid)
         {
-            context.Result = new BadRequestObjectResult(context.ModelState);
+         
+
+            var errorResponse = new ErrorResponse(
+                statusCode: 400,
+                title: "Validation Failed",
+                detail: new BadRequestObjectResult(context.ModelState).Value,
+                type: "ValidationException",
+                instance: context.HttpContext.Request.Path.ToString()
+            );
+
+            context.Result = new BadRequestObjectResult(errorResponse);
         }
     }
 
