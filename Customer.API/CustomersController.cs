@@ -22,14 +22,14 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         return StatusCode(201, customerId);
     }
 
-    [HttpDelete("{Id}")]
+    [HttpDelete("{id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult> DeleteCustomer([FromRoute] int customerId)
+    public async Task<ActionResult> DeleteCustomer([FromRoute] int id)
     {
-        await customerService.DeleteCustomer(customerId);
+        await customerService.DeleteCustomer(id);
         return StatusCode(204);
     }
 
@@ -42,17 +42,6 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     {
         await customerService.UpdateCustomer(updatedCustomerData);
         return StatusCode(204);
-    }
-
-    [HttpGet("{Id}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult> GetCustomerById([FromRoute] int customerId)
-    {
-        var customer = await customerService.GetCustomerById(customerId);
-        return Ok(customer);
     }
 
     [HttpPost("Search")]
@@ -86,7 +75,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         }
     }
 
-    [HttpDelete("Relations/{Id}")]
+    [HttpDelete("Relations/{id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -98,14 +87,14 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         return StatusCode(204);
     }
 
-    [HttpGet("{Id}/Relations")]
+    [HttpGet("{id}/Relations")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int customerId)
+    public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int id)
     {
-        var report = await customerService.GetRelationReport(customerId);
+        var report = await customerService.GetRelationReport(id);
         return StatusCode(200, report);
     }
 

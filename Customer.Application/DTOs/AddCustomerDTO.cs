@@ -5,12 +5,11 @@ namespace Customer.Application.Dtos;
 
 public class AddCustomerDTO
 {
-    public string FirstName { get; init; } = string.Empty;
-    public string LastName { get; init; } = string.Empty;
-    public Gender Gender { get; init; }
-    public string PersonalId { get; init; } = string.Empty;
-    public DateTime DateOfBirth { get; init; }
-    public int CityId { get; init; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
+    public string PersonalId { get; set; } = string.Empty;
+    public DateTime DateOfBirth { get; set; }
+    public int CityId { get; set; }
     public List<PhoneNumberDTO> PhoneNumbers { get; set; } = [];
-    public string ImagePath { get; init; } = string.Empty;
 }

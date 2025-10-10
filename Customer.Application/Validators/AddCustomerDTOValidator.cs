@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Customer.Application.Dtos;
 using Customer.Application.Validators.Extensions;
@@ -23,6 +24,12 @@ public class AddCustomerDTOValidator:AbstractValidator<AddCustomerDTO>
         }).WithMessage("Customer must be at least 18 years old.");
         RuleFor(c=> c.CityId).NotNull().NotEmpty().GreaterThan(0).WithMessage("CityId must be a positive number");;;
         RuleForEach(c => c.PhoneNumbers).SetValidator(new PhoneNumberDTOValidator());
-        //TODO Addvalidation for image
+        // RuleFor(c=> c.ImagePath).
+        //     Must(value=> value== null || Guid.TryParse(value, out _))
+        //     .WithMessage("ImagePath must be either null or a valid GUID.");
+
+
+
+
     }
 }

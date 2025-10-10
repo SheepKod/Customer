@@ -76,7 +76,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         // bucket name unda gavitano samde readonly constanshi
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
-        if (customer.ImageKey != Guid.Empty)
+        if (customer.ImageKey != Guid.Empty && customer.ImageKey != null)
         {
             await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
             customer.ImageKey = Guid.Empty;
@@ -173,22 +173,13 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         if (exists) 
             throw new DuplicationException($"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
     }
-    
-    private async Task EnsureRelationExist(int customerId, int relatedCustomerId, RelationType type)
-    {
-        var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
-        if (!exists) 
-            throw new NotFoundException($"Relation between {customerId} and {relatedCustomerId} with type {type} does not exists");
-    }
 
     private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<PhoneNumber> incomingNumbers)
     {
         foreach (var phoneNumber in incomingNumbers)
         {
             var phoneNumberExists = existingNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
-                
-            // aq tu ar arsebobs es nomeri mivamato rogorc axali tu error davurtya
-            // me mgonia ro raxan update xdeba ar unda ematebodes axali nomeri tu id ar gamoayola
+            
             if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
             phoneNumberExists.Number = phoneNumber.Number;
             phoneNumberExists.Type = phoneNumber.Type;
