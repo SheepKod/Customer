@@ -1,0 +1,11 @@
+{
+  "CityIdRequired": "CityId must be a positive number",
+  "FirstNameRequired": "First name is required",
+  "FirstNameMinLength": "First name must be at least 2 characters",
+  "LastNameRequired": "Last name is required",
+  "PersonalIdRequired": "Personal ID is required",
+  "PersonalIdLength": "Personal ID must be exactly 11 characters",
+  "InvalidAge": "Age must be at least 18 years old",
+  "TextOnlyGeorgianOrEnglish": "Text must contain only georgian or english characters",
+  "InvalidPhoneNumber": "Phone number must be exactly 4 or 50 characters"
+}
