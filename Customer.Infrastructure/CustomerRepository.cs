@@ -86,6 +86,8 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
         var totalCount = await query.CountAsync();
 
         var customersFound = await query
+            .Include(c=> c.PhoneNumbers)
+            .Include(c=>c.Relations)
             .Skip((paging.PageNumber - 1) * paging.PageSize)
             .Take(paging.PageSize)
             .ToListAsync();

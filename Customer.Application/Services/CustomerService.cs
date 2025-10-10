@@ -13,11 +13,11 @@ namespace Customer.Application;
 public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
 {
     public async Task<int> AddCustomer(AddCustomerDTO customer)
-    { 
+    {
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
-        var city =  await repo.GetCityById(customer.CityId);
-        if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
-       var newCustomer = new IndividualCustomer
+        var city = await repo.GetCityById(customer.CityId);
+        if (city == null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
+        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
             LastName = customer.LastName,
@@ -28,34 +28,36 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             PhoneNumbers = convertedPhoneNumbers,
         };
         var customerId = await repo.AddCustomer(newCustomer);
-      
+
         return customerId;
-       
     }
 
     public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData)
     {
         var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId);
-        
-        if (customer == null) throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
-        
-        if(updatedCustomerData.FirstName != null) customer.FirstName = updatedCustomerData.FirstName;
-        
+
+        if (customer == null)
+            throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
+
+        if (updatedCustomerData.FirstName != null) customer.FirstName = updatedCustomerData.FirstName;
+
         if (updatedCustomerData.PersonalId != null) customer.PersonalId = updatedCustomerData.PersonalId;
-        
-        if(updatedCustomerData.LastName != null) customer.LastName = updatedCustomerData.LastName;
-        
-        if(updatedCustomerData.Gender.HasValue) customer.Gender = updatedCustomerData.Gender.Value;
-        
+
+        if (updatedCustomerData.LastName != null) customer.LastName = updatedCustomerData.LastName;
+
+        if (updatedCustomerData.Gender.HasValue) customer.Gender = updatedCustomerData.Gender.Value;
+
         if (updatedCustomerData.DateOfBirth.HasValue) customer.DateOfBirth = updatedCustomerData.DateOfBirth.Value;
-        
-        if(updatedCustomerData.CityId.HasValue)
+
+        if (updatedCustomerData.CityId.HasValue)
         {
-            var city =  await repo.GetCityById(customer.CityId);
-            if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
+            var city = await repo.GetCityById(customer.CityId);
+            if (city == null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
             customer.CityId = updatedCustomerData.CityId.Value;
-        };
-        
+        }
+
+        ;
+
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {
             UpdatePhoneNumbers(customer.PhoneNumbers, updatedCustomerData.PhoneNumbers);
@@ -63,7 +65,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
 
         await repo.SaveChangesAsync();
     }
-    
+
     public async Task DeleteCustomer(int customerId)
     {
         var customer = await repo.GetCustomerById(customerId);
@@ -82,6 +84,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             customer.ImageKey = Guid.Empty;
             await repo.SaveChangesAsync();
         }
+
         var fileKey = Guid.NewGuid();
         await using (var stream = image.OpenReadStream())
         {
@@ -94,11 +97,13 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             };
             await amazonS3.PutObjectAsync(request);
         }
+
         customer.ImageKey = fileKey;
         await repo.SaveChangesAsync();
     }
 
-    public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search, PagingDTO paging)
+    public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search,
+        PagingDTO paging)
     {
         return await repo.SearchCustomers(search, paging);
     }
@@ -132,59 +137,57 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             Type = addRelation.Type
         };
         var relationId = await repo.AddRelation(newRelation);
-        
+
         return relationId;
     }
-    
+
     public async Task DeleteRelation(int relationId)
     {
-   
-       var relationExists =  await repo.GetRelationById(relationId);
-       if(relationExists == null) throw new NotFoundException($"Relation with ID: {relationId} not found");
-       await repo.DeleteRelation(relationExists);
+        var relationExists = await repo.GetRelationById(relationId);
+        if (relationExists == null) throw new NotFoundException($"Relation with ID: {relationId} not found");
+        await repo.DeleteRelation(relationExists);
     }
-    
+
     public async Task<List<RelationReport>> GetRelationReport(int customerId)
     {
-   
-        var customer =  await repo.GetCustomerFullDetailsById(customerId);
-        if(customer == null) throw new NotFoundException($"Relation with ID: {customerId} not found");
-        var relationReport = customer.Relations.GroupBy(r=> r.Type)
-            .Select(g=> new RelationReport
+        var customer = await repo.GetCustomerFullDetailsById(customerId);
+        if (customer == null) throw new NotFoundException($"Relation with ID: {customerId} not found");
+        var relationReport = customer.Relations.GroupBy(r => r.Type)
+            .Select(g => new RelationReport
             {
                 Type = g.Key,
                 Count = g.Count()
             }).ToList();
-        
+
         return relationReport;
     }
-    
-    
+
+
     // Helper Methods might move to a different class
     private async Task EnsureCustomerExists(int customerId)
     {
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
     }
-    
+
     private async Task EnsureRelationDoesNotExist(int customerId, int relatedCustomerId, RelationType type)
     {
         var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
-        if (exists) 
-            throw new DuplicationException($"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
+        if (exists)
+            throw new DuplicationException(
+                $"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
     }
 
-    private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<PhoneNumber> incomingNumbers)
+    private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<UpdatePhoneNumberDTO> incomingNumbers)
     {
         foreach (var phoneNumber in incomingNumbers)
         {
-            var phoneNumberExists = existingNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
-            
-            if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
-            phoneNumberExists.Number = phoneNumber.Number;
-            phoneNumberExists.Type = phoneNumber.Type;
+            var phoneNumberFromDb = existingNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
+
+            if (phoneNumberFromDb == null)
+                throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
+            if (!string.IsNullOrWhiteSpace(phoneNumber.Number)) phoneNumberFromDb.Number = phoneNumber.Number;
+            if (phoneNumber.Type.HasValue) phoneNumberFromDb.Type = phoneNumber.Type.Value;
         }
     }
-
-    
 }

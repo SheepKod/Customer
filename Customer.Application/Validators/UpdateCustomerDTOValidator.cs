@@ -36,9 +36,8 @@ public class UpdateCustomerDTOValidator : AbstractValidator<UpdateCustomerDTO>
             .GreaterThan(0)
             .When(x => x.CityId.HasValue);
 
-        // TODO
-        // RuleForEach(x => x.PhoneNumbers)
-        //     .SetValidator(new PhoneNumberDTOValidator())
-        //     .When(x => x.PhoneNumbers != null);
+        RuleForEach(x => x.PhoneNumbers)
+            .SetValidator(new UpdatePhoneNumberDTOValidator(localizer));
+
     }
 }

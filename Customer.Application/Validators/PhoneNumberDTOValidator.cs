@@ -1,3 +1,4 @@
+using Customer.Application.Constants;
 using Customer.Application.Dtos;
 using Customer.Application.Services;
 using FluentValidation;
@@ -10,8 +11,8 @@ public class PhoneNumberDTOValidator : AbstractValidator<PhoneNumberDTO>
     {
         RuleFor(p => p.Number)
             .NotEmpty()
-            .Matches(@"^\d{4,50}$")
-            .WithMessage(localizer["InvalidPhoneNumber"]);
+            .Matches(RegexPatterns.PhoneNumber)
+            .WithMessage(localizer[ValidationMessageKeys.InvalidPhoneNumber]);
         RuleFor(p => p.Type)
             .IsInEnum();
     }

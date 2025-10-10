@@ -1,3 +1,4 @@
+using Customer.Application.DTOs;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
 
@@ -12,5 +13,5 @@ public class UpdateCustomerDTO
     public string? PersonalId { get; set; } 
     public DateTime? DateOfBirth { get; set; }
     public int? CityId { get; set; }
-    public List<PhoneNumber>? PhoneNumbers { get; set; }
+    public List<UpdatePhoneNumberDTO>? PhoneNumbers { get; set; }
 }
