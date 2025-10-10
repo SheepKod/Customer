@@ -57,7 +57,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             customer.CityId = updatedCustomerData.CityId.Value;
         }
 
-        ;
+        
 
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {

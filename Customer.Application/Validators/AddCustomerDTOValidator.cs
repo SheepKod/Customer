@@ -16,14 +16,7 @@ public class AddCustomerDTOValidator:AbstractValidator<AddCustomerDTO>
         RuleFor(c=> c.LastName).OnlyGeorgianOrLatinLetters(localizer);
         RuleFor(c=> c.Gender).NotNull().IsInEnum();
         RuleFor(c=> c.PersonalId).NotNull().NotEmpty().ValidPersonalId();
-        RuleFor(c => c.DateOfBirth).NotNull().NotEmpty().Must(date =>
-        {
-
-            var today = DateTime.Today;
-            var age = today.Year - date.Year;
-            if (date.Date > today.AddYears(-age)) age--;
-            return age >= 18;
-        }).WithMessage(localizer[ValidationMessageKeys.InvalidAge]);
+        RuleFor(c => c.DateOfBirth).NotNull().NotEmpty().IsAdult(localizer);
         RuleFor(c => c.CityId).NotNull().NotEmpty().GreaterThan(0);
         RuleForEach(c => c.PhoneNumbers).SetValidator(new PhoneNumberDTOValidator(localizer));
 

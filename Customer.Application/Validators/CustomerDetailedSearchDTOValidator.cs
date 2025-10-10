@@ -29,14 +29,7 @@ public class CustomerDetailedSearchDTOValidator : AbstractValidator<CustomerDeta
             .When(x => x.Gender.HasValue);
 
         RuleFor(x => x.DateOfBirth)
-            .Must(date =>
-            {
-                if (!date.HasValue) return true;
-                var today = DateTime.Today;
-                var age = today.Year - date.Value.Year;
-                if (date.Value.Date > today.AddYears(-age)) age--;
-                return age >= 18;
-            })
+            .IsAdult(localizer)
             .When(x => x.DateOfBirth.HasValue)
             .WithMessage(localizer[ValidationMessageKeys.InvalidAge]);
 
