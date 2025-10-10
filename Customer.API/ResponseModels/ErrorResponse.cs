@@ -1,10 +1,10 @@
 namespace Customer.API.ResponseModels;
 
-public class ErrorResponse(int statusCode, string message, string? details = null, string? path = null)
+public class ErrorResponse(int statusCode, string title, string detail, string type, string instance)
 {
-    public int StatusCode { get; set; } = statusCode;
-    public string Message { get; set; } = message;
-    public string? Details { get; set; } = details;
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    public string? Path { get; set; } = path;
+    public string Type { get; set; } = type;
+    public int Status { get; set; } = statusCode;
+    public string Title { get; set; } = title;
+    public string? Detail { get; set; } = detail;
+    public string Instance { get; set; } = instance;
 }

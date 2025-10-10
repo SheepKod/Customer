@@ -15,26 +15,28 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
         }
         catch (NotFoundException ex)
         {
-            logger.LogError(ex.Message);
-            await HandleExceptionAsync(context, ex, 404);
+            logger.LogError(ex.Message, ex);
+            await HandleExceptionAsync(context, "Resource Not Found", ex.Message,ex.GetType().Name,404);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message);
+            logger.LogError(ex.Message, ex);
             
-            await HandleExceptionAsync(context, ex, 500);
+            await HandleExceptionAsync(context, "Internal Server Error",  null,ex.GetType().Name,500);
         }
     }
     
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception, int statusCode)
+    private static async Task HandleExceptionAsync(HttpContext context, string title, string? detail, string type, int statusCode)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
 
         var errorResponse = new ErrorResponse(
-            statusCode: statusCode,
-            message: exception.Message,
-            path: context.Request.Path
+            statusCode,
+            title,
+            detail,
+            instance: context.Request.Path.ToString(),
+            type: type
         );
 
         var jsonOptions = new JsonSerializerOptions

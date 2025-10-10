@@ -16,7 +16,8 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
     {
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
         var city = await repo.GetCityById(customer.CityId);
-        if (city == null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
+        if (city == null)
+            throw new NotFoundException($"City with ID: {customer.CityId} not found");
         var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
