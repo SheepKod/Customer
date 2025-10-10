@@ -1,8 +1,9 @@
+using Customer.Domain.Enums;
 using Customer.Domain.Models;
 
 namespace Customer.Infrastructure.SeedData;
 
-public static class CitiesData
+public static class CustomersData
 {
     public static readonly List<City> Cities =
     [
@@ -36,4 +37,5 @@ public static class CitiesData
         new() { Id = 14, Name = "Sydney", Country = "Australia" },
         new() { Id = 15, Name = "Melbourne", Country = "Australia" },
     ];
+
 }

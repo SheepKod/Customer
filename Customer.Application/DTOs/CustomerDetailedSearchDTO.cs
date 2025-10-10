@@ -1,5 +1,4 @@
 using Customer.Domain.Enums;
-using Customer.Domain.Models;
 
 namespace Customer.Application.DTOs;
 

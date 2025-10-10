@@ -1,3 +1,7 @@
+using System.Text.Json;
+using Customer.Application.Exceptions;
+using Customer.API.ResponseModels;
+
 namespace Customer.API.Middlewares;
 
 public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
@@ -9,20 +13,37 @@ public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<Glo
         {
             await next(context);
         }
-        catch (InvalidOperationException ex)
+        catch (NotFoundException ex)
         {
-            context.Response.StatusCode = 400;
             logger.LogError(ex.Message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            context.Response.StatusCode = 500;
-            logger.LogError(ex.Message);
+            await HandleExceptionAsync(context, ex, 404);
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = 500;
             logger.LogError(ex.Message);
+            
+            await HandleExceptionAsync(context, ex, 500);
         }
+    }
+    
+    private static async Task HandleExceptionAsync(HttpContext context, Exception exception, int statusCode)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = statusCode;
+
+        var errorResponse = new ErrorResponse(
+            statusCode: statusCode,
+            message: exception.Message,
+            path: context.Request.Path
+        );
+
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+
+        var jsonResponse = JsonSerializer.Serialize(errorResponse, jsonOptions);
+        await context.Response.WriteAsync(jsonResponse);
     }
 }

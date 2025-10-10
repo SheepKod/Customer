@@ -1,18 +1,22 @@
+using Amazon.S3;
+using Amazon.S3.Model;
 using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Customer.Application;
 
-public class CustomerService(ICustomerRepository repo)
+public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
 {
     public async Task<int> AddCustomer(AddCustomerDTO customer)
     { 
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
-        
+        var city =  await repo.GetCityById(customer.CityId);
+        if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
        var newCustomer = new IndividualCustomer
         {
             FirstName = customer.FirstName,
@@ -45,7 +49,12 @@ public class CustomerService(ICustomerRepository repo)
         
         if (updatedCustomerData.DateOfBirth.HasValue) customer.DateOfBirth = updatedCustomerData.DateOfBirth.Value;
         
-        if(updatedCustomerData.CityId.HasValue) customer.CityId = updatedCustomerData.CityId.Value;
+        if(updatedCustomerData.CityId.HasValue)
+        {
+            var city =  await repo.GetCityById(customer.CityId);
+            if(city==null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
+            customer.CityId = updatedCustomerData.CityId.Value;
+        };
         
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {
@@ -60,6 +69,33 @@ public class CustomerService(ICustomerRepository repo)
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
         await repo.DeleteCustomer(customer);
+    }
+
+    public async Task UploadImage(int customerId, IFormFile image)
+    {
+        // bucket name unda gavitano samde readonly constanshi
+        var customer = await repo.GetCustomerById(customerId);
+        if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
+        if (customer.ImageKey != Guid.Empty && customer.ImageKey != null)
+        {
+            await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
+            customer.ImageKey = Guid.Empty;
+            await repo.SaveChangesAsync();
+        }
+        var fileKey = Guid.NewGuid();
+        await using (var stream = image.OpenReadStream())
+        {
+            var request = new PutObjectRequest
+            {
+                BucketName = "tbc-customer-img",
+                Key = fileKey.ToString(),
+                InputStream = stream,
+                ContentType = image.ContentType
+            };
+            await amazonS3.PutObjectAsync(request);
+        }
+        customer.ImageKey = fileKey;
+        await repo.SaveChangesAsync();
     }
 
     public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search, PagingDTO paging)
@@ -91,7 +127,7 @@ public class CustomerService(ICustomerRepository repo)
         await EnsureRelationDoesNotExist(addRelation.CustomerId, addRelation.RelatedCustomerId, addRelation.Type);
         var newRelation = new Relation
         {
-            CustomerId = addRelation.CustomerId,
+            IndividualCustomerId = addRelation.CustomerId,
             RelatedCustomerId = addRelation.RelatedCustomerId,
             Type = addRelation.Type
         };
@@ -137,22 +173,13 @@ public class CustomerService(ICustomerRepository repo)
         if (exists) 
             throw new DuplicationException($"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
     }
-    
-    private async Task EnsureRelationExist(int customerId, int relatedCustomerId, RelationType type)
-    {
-        var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
-        if (!exists) 
-            throw new NotFoundException($"Relation between {customerId} and {relatedCustomerId} with type {type} does not exists");
-    }
 
     private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<PhoneNumber> incomingNumbers)
     {
         foreach (var phoneNumber in incomingNumbers)
         {
             var phoneNumberExists = existingNumbers.FirstOrDefault(p => p.Id == phoneNumber.Id);
-                
-            // aq tu ar arsebobs es nomeri mivamato rogorc axali tu error davurtya
-            // me mgonia ro raxan update xdeba ar unda ematebodes axali nomeri tu id ar gamoayola
+            
             if(phoneNumberExists == null) throw new NotFoundException($"Phone number with ID: {phoneNumber.Id} not found");
             phoneNumberExists.Number = phoneNumber.Number;
             phoneNumberExists.Type = phoneNumber.Type;

@@ -10,6 +10,7 @@ namespace Customer.Application.Abstractions;
 public interface ICustomerRepository
 {
    public Task<int> AddCustomer(IndividualCustomer customer);
+   public Task<City> GetCityById(int id);
    public Task<IndividualCustomer?> GetCustomerById(int customerId);
    public Task DeleteCustomer(IndividualCustomer customerId);
    public Task<IndividualCustomer?> GetCustomerFullDetailsById(int customerId);
