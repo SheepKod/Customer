@@ -31,12 +31,12 @@ public class ValidationActionFilter(IServiceProvider serviceProvider) : IActionF
         }
         if (!context.ModelState.IsValid)
         {
-         
 
+            var errors = new BadRequestObjectResult(context.ModelState).Value;
             var errorResponse = new ErrorResponse(
                 statusCode: 400,
                 title: "Validation Failed",
-                detail: new BadRequestObjectResult(context.ModelState).Value,
+                detail: errors,
                 type: "ValidationException",
                 instance: context.HttpContext.Request.Path.ToString()
             );
