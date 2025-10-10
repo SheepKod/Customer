@@ -1,16 +1,17 @@
 using Customer.Application.Dtos;
+using Customer.Application.Services;
 using FluentValidation;
 
 namespace Customer.Application.Validators;
 
 public class PhoneNumberDTOValidator : AbstractValidator<PhoneNumberDTO>
 {
-    public PhoneNumberDTOValidator()
+    public PhoneNumberDTOValidator(LocalizationService localizer)
     {
         RuleFor(p => p.Number)
             .NotEmpty()
-            .Matches(@"^\d{4,50}$") 
-            .WithMessage("Phone Number must be between 4 and 50 digits long and contain only digits");
+            .Matches(@"^\d{4,50}$")
+            .WithMessage(localizer["InvalidPhoneNumber"]);
         RuleFor(p => p.Type)
             .IsInEnum();
     }

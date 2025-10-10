@@ -1,19 +1,17 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using Customer.Application.Constants;
 
 namespace Customer.API.Middlewares;
 
 public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMiddleware> logger)
 {
-    private IReadOnlySet<string> SupportedCultures => new HashSet<string> { "ka", "en", "ru", "ge" };
-
-    private const string DefaultCulture = "ka";
     
     public async Task InvokeAsync(HttpContext context)
     {
         var requestedCulture = context.Request.Headers["Accept-Language"].ToString();
-        var cultureLang = DefaultCulture;
-        if (SupportedCultures.Contains(requestedCulture))
+        var cultureLang = LocalizationConstants.DefaultCulture;
+        if (LocalizationConstants.SupportedCultures.Contains(requestedCulture))
         {
             
             cultureLang = requestedCulture;
@@ -30,7 +28,7 @@ public class LocalizationMiddleware(RequestDelegate next, ILogger<LocalizationMi
         }
         catch (CultureNotFoundException ex)
         {
-            var fallbackCulture = new CultureInfo(DefaultCulture);
+            var fallbackCulture = new CultureInfo(LocalizationConstants.DefaultCulture);
             CultureInfo.CurrentCulture = fallbackCulture;
             CultureInfo.CurrentUICulture = fallbackCulture;
 

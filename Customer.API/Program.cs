@@ -3,6 +3,7 @@ using Customer.API.ActionFilters;
 using Customer.API.Middlewares;
 using Customer.Application;
 using Customer.Application.Abstractions;
+using Customer.Application.Services;
 using Customer.Application.Validators;
 using Customer.Infrastructure;
 using FluentValidation;
@@ -23,7 +24,7 @@ builder.Services.AddControllers(opts =>
 {
     opts.Filters.Add<ValidationActionFilter>();
 });
-
+builder.Services.AddScoped<LocalizationService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
 // ამას ინტერფეისი ხომ არ გავუკეთო?
