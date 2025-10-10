@@ -31,14 +31,19 @@ public class ValidationActionFilter(IServiceProvider serviceProvider) : IActionF
         }
         if (!context.ModelState.IsValid)
         {
-
-            var errors = new BadRequestObjectResult(context.ModelState).Value;
+            var errors = context.ModelState
+                .Where(x => x.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
             var errorResponse = new ErrorResponse(
                 statusCode: 400,
                 title: "Validation Failed",
-                detail: errors,
+                detail:"One or more validation failures have occurred.",
                 type: "ValidationException",
-                instance: context.HttpContext.Request.Path.ToString()
+                instance: context.HttpContext.Request.Path.ToString(),
+                extensions:errors
             );
 
             context.Result = new BadRequestObjectResult(errorResponse);
