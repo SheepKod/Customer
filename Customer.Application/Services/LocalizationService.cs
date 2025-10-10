@@ -16,10 +16,13 @@ public class LocalizationService
 
     private void LoadLocalizations(IWebHostEnvironment env)
     {
-            var resourcePath = Path.Combine( env.ContentRootPath, "..","Customer.Application" ,"Resources");
+        // This gets the Customer.API directory
+        var resourcePath = Path.Combine(env.ContentRootPath, "..", "Customer.Application", "Resources");
+        
         foreach (var culture in LocalizationConstants.SupportedCultures)
         {
-            var filePath = Path.Combine(resourcePath,  $"ValidationMessages.{culture}.json");
+            var filePath = Path.Combine(resourcePath, $"ValidationMessages.{culture}.json");
+            
             if (File.Exists(filePath))
             {
                 var json = File.ReadAllText(filePath);
@@ -33,7 +36,7 @@ public class LocalizationService
         }
     }
 
-    private string GetString(string key)
+    public string GetString(string key)
     {
         var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         
