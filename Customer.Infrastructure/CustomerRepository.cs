@@ -28,12 +28,6 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
         var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.Id == customerId);
         return customer;
     }
-    
-    public async Task<IndividualCustomer?> GetCustomerByPersonalId(string personalId)
-    {
-        var customer = await context.RetailCustomers.FirstOrDefaultAsync(c => c.PersonalId == personalId);
-        return customer;
-    }
 
     public async Task<int> AddRelation(Relation relation)
     {
