@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Customer.Application.Validators;
 
-public class AddRelationDTOValidator : AbstractValidator<AddRelationDTO>
+public class AddRelationDTOValidator : AbstractValidator<RelationDTO>
 {
     public AddRelationDTOValidator()
     {

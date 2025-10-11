@@ -75,10 +75,10 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
 
     public async Task UploadImage(int customerId, IFormFile image)
     {
-        // bucket name unda gavitano samde readonly constanshi
+        // TODO: bucket name unda gavitano samde readonly constanshi
         var customer = await repo.GetCustomerById(customerId);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
-        if (customer.ImageKey != Guid.Empty && customer.ImageKey != null)
+        if (customer.ImageKey != null)
         {
             try
             {
@@ -89,7 +89,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
                 throw new NotFoundException($"Image with ID : {customer.ImageKey} not found in S3", ex);
             }
 
-            customer.ImageKey = Guid.Empty;
+            customer.ImageKey = null;
             await repo.SaveChangesAsync();
         }
 
@@ -110,23 +110,63 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
         await repo.SaveChangesAsync();
     }
 
-    public async Task<PagedResult<IndividualCustomer>> SearchCustomers(CustomerDetailedSearchDTO search,
+    public async Task<PagedResult<IndividualCustomerSearchResultDTO>> SearchCustomers(CustomerDetailedSearchDTO search,
         PagingDTO paging)
     {
-        return await repo.SearchCustomers(search, paging);
+        // TODO: Optimize for large data
+        var customers = await repo.SearchCustomers(search, paging);
+
+        var result = new PagedResult<IndividualCustomerSearchResultDTO>
+        {
+            TotalCount = customers.TotalCount,
+            PageNumber = customers.PageNumber,
+            PageSize = customers.PageSize,
+            Results = []
+        };
+        foreach (var customer in customers.Results)
+        {
+            var  customerDTO= new IndividualCustomerSearchResultDTO
+            {
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                PersonalId = customer.PersonalId,
+                Gender = customer.Gender,
+                DateOfBirth = customer.DateOfBirth,
+                CityId = customer.CityId
+            };
+
+            if (customer.ImageKey == null)
+            {
+                result.Results.Add(customerDTO);
+                continue;
+            }
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = "tbc-customer-img",
+                Key = customer.ImageKey.ToString(),
+                Expires = DateTime.UtcNow.AddDays(1)
+            };
+            var url = await amazonS3.GetPreSignedURLAsync(request);
+            customerDTO.ImageUrl = url;
+            
+            result.Results.Add(customerDTO);
+        }
+        
+        return result;
     }
 
 
-    public async Task<int> AddRelation(AddRelationDTO addRelation)
+    public async Task<int> AddRelation(RelationDTO relation)
     {
-        await EnsureCustomerExists(addRelation.CustomerId);
-        await EnsureCustomerExists(addRelation.RelatedCustomerId);
-        await EnsureRelationDoesNotExist(addRelation.CustomerId, addRelation.RelatedCustomerId, addRelation.Type);
+        await EnsureCustomerExists(relation.CustomerId);
+        await EnsureCustomerExists(relation.RelatedCustomerId);
+        await EnsureRelationDoesNotExist(relation.CustomerId, relation.RelatedCustomerId, relation.Type);
         var newRelation = new Relation
         {
-            IndividualCustomerId = addRelation.CustomerId,
-            RelatedCustomerId = addRelation.RelatedCustomerId,
-            Type = addRelation.Type
+            IndividualCustomerId = relation.CustomerId,
+            RelatedCustomerId = relation.RelatedCustomerId,
+            Type = relation.Type
         };
         var relationId = await repo.AddRelation(newRelation);
 

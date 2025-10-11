@@ -89,7 +89,9 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
         return new PagedResult<IndividualCustomer>
         {
             TotalCount = totalCount,
-            Results = customersFound
+            Results = customersFound,
+            PageNumber = paging.PageNumber,
+            PageSize = paging.PageSize,
         };
 
     }

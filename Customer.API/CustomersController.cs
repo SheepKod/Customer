@@ -54,9 +54,9 @@ public class CustomersController(ICustomerService customerService) : ControllerB
     [ProducesResponseType(201)]
     [ProducesResponseType(404)]
     [ProducesResponseType(409)]
-    public async Task<ActionResult<int>> AddRelation([FromBody] AddRelationDTO addRelation)
+    public async Task<ActionResult<int>> AddRelation([FromBody] RelationDTO relation)
     {
-        var relationId = await customerService.AddRelation(addRelation);
+        var relationId = await customerService.AddRelation(relation);
         return StatusCode(StatusCodes.Status201Created, relationId);
     }
 
