@@ -1,4 +1,0 @@
-ამაზონის ქრედენშალები
-
-წვდომის გასაღები AKIAYPGYRXSC665IM7PX,
-საიდუმლო გასაღები R9vgdaNiZoxZhQjUQVj6jklUM3P+UDai5T0MWVJm
