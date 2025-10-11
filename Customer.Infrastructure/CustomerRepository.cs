@@ -31,7 +31,7 @@ public class CustomerRepository(ApplicationDbContext context): ICustomerReposito
 
     public async Task<int> AddRelation(Relation relation)
     {
-        var newRelation = await context.AddAsync(relation);
+        await context.AddAsync(relation);
         await context.SaveChangesAsync();
         return relation.Id;
 
