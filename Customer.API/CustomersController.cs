@@ -1,3 +1,4 @@
+using System.Net;
 using Amazon.S3;
 using Customer.Application;
 using Customer.Application.Dtos;
@@ -19,7 +20,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     public async Task<ActionResult<int>> AddCustomer([FromBody] AddCustomerDTO customer)
     {
         var customerId = await customerService.AddCustomer(customer);
-        return StatusCode(201, customerId);
+        return StatusCode(StatusCodes.Status201Created, customerId);
     }
 
     [HttpDelete("{id}")]
@@ -30,7 +31,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     public async Task<ActionResult> DeleteCustomer([FromRoute] int id)
     {
         await customerService.DeleteCustomer(id);
-        return StatusCode(204);
+        return NoContent();
     }
 
     [HttpPatch]
@@ -41,7 +42,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     public async Task<ActionResult> UpdateCustomer([FromBody] UpdateCustomerDTO updatedCustomerData)
     {
         await customerService.UpdateCustomer(updatedCustomerData);
-        return StatusCode(204);
+        return NoContent();
     }
 
     [HttpPost("Search")]
@@ -67,7 +68,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         try
         {
             var relationId = await customerService.AddRelation(addRelation);
-            return StatusCode(201, relationId);
+            return StatusCode(StatusCodes.Status201Created, relationId);
         }
         catch (DuplicationException ex)
         {
@@ -84,7 +85,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     public async Task<IActionResult> DeleteRelation([FromRoute] int id)
     {
         await customerService.DeleteRelation(id);
-        return StatusCode(204);
+        return NoContent();
     }
 
     [HttpGet("{id}/Relations")]
@@ -95,7 +96,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
     public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int id)
     {
         var report = await customerService.GetRelationReport(id);
-        return StatusCode(200, report);
+        return Ok(report);
     }
 
     [HttpPost("Image")]
