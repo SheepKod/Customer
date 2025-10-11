@@ -62,9 +62,6 @@ msbuild.binlog
 .project.lock.json
 global.json
 
-# Runtime directory
-**/Properties/launchSettings.json
-
 # test coverage
 coverage/
 *.coverage
