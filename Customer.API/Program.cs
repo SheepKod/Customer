@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Customer.API.ActionFilters;
 using Customer.API.Middlewares;
-using Customer.Application;
+using Customer.Application.Services;
 using Customer.Application.Abstractions;
 using Customer.Application.Validators;
 using Customer.Infrastructure;

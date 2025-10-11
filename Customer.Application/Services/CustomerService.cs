@@ -4,19 +4,18 @@ using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
-using Customer.Application.Resources;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace Customer.Application;
+namespace Customer.Application.Services;
 
 public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICustomerService
 {
-    public async Task<int> AddCustomer(AddCustomerDTO customer)
+    public async Task<int> AddCustomer(AddCustomerDTO customer, CancellationToken cancellationToken)
     {
         var convertedPhoneNumbers = ConvertPhoneNumbers(customer.PhoneNumbers);
-        var city = await repo.GetCityById(customer.CityId);
+        var city = await repo.GetCityById(customer.CityId, cancellationToken);
         if (city == null)
             throw new NotFoundException($"City with ID: {customer.CityId} not found");
         var newCustomer = new IndividualCustomer
@@ -29,14 +28,14 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
             CityId = customer.CityId,
             PhoneNumbers = convertedPhoneNumbers,
         };
-        var customerId = await repo.AddCustomer(newCustomer);
+        var customerId = await repo.AddCustomer(newCustomer, cancellationToken);
 
         return customerId;
     }
 
-    public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData)
+    public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData, CancellationToken cancellationToken)
     {
-        var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId);
+        var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId, cancellationToken);
         if (customer == null)
             throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
 
@@ -52,7 +51,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
 
         if (updatedCustomerData.CityId.HasValue)
         {
-            var city = await repo.GetCityById(customer.CityId);
+            var city = await repo.GetCityById(customer.CityId,cancellationToken);
             if (city == null) throw new NotFoundException($"City with ID: {customer.CityId} not found");
             customer.CityId = updatedCustomerData.CityId.Value;
         }
@@ -63,26 +62,26 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
             UpdatePhoneNumbers(customer.PhoneNumbers, updatedCustomerData.PhoneNumbers);
         }
 
-        await repo.SaveChangesAsync();
+        await repo.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteCustomer(int customerId)
+    public async Task DeleteCustomer(int customerId, CancellationToken cancellationToken)
     {
-        var customer = await repo.GetCustomerById(customerId);
+        var customer = await repo.GetCustomerById(customerId, cancellationToken);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
-        await repo.DeleteCustomer(customer);
+        await repo.DeleteCustomer(customer,cancellationToken);
     }
 
-    public async Task UploadImage(int customerId, IFormFile image)
+    public async Task UploadImage(int customerId, IFormFile image, CancellationToken cancellationToken)
     {
         // TODO: bucket name unda gavitano samde readonly constanshi
-        var customer = await repo.GetCustomerById(customerId);
+        var customer = await repo.GetCustomerById(customerId, cancellationToken);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
         if (customer.ImageKey != null)
         {
             try
             {
-                await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
+                await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}", cancellationToken);
             }
             catch (AmazonS3Exception ex) when (ex.ErrorCode == StatusCodes.Status404NotFound.ToString())
             {
@@ -90,7 +89,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
             }
 
             customer.ImageKey = null;
-            await repo.SaveChangesAsync();
+            await repo.SaveChangesAsync(cancellationToken);
         }
 
         var fileKey = Guid.NewGuid();
@@ -103,18 +102,18 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
                 InputStream = stream,
                 ContentType = image.ContentType
             };
-            await amazonS3.PutObjectAsync(request);
+            await amazonS3.PutObjectAsync(request, cancellationToken);
         }
 
         customer.ImageKey = fileKey;
-        await repo.SaveChangesAsync();
+        await repo.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<PagedResult<IndividualCustomerSearchResultDTO>> SearchCustomers(CustomerDetailedSearchDTO search,
-        PagingDTO paging)
+        PagingDTO paging, CancellationToken cancellationToken)
     {
         // TODO: Optimize for large data
-        var customers = await repo.SearchCustomers(search, paging);
+        var customers = await repo.SearchCustomers(search, paging, cancellationToken);
 
         var searchResult = new PagedResult<IndividualCustomerSearchResultDTO>
         {
@@ -157,7 +156,8 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
         {
             BucketName = "tbc-customer-img",
             Key = customerImageKey.ToString(),
-            Expires = DateTime.UtcNow.AddDays(1)
+            Expires = DateTime.UtcNow.AddDays(1),
+
         };
         var url = await amazonS3.GetPreSignedURLAsync(request);
 
@@ -165,32 +165,32 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
     }
 
 
-    public async Task<int> AddRelation(RelationDTO relation)
+    public async Task<int> AddRelation(RelationDTO relation, CancellationToken cancellationToken )
     {
-        await EnsureCustomerExists(relation.CustomerId);
-        await EnsureCustomerExists(relation.RelatedCustomerId);
-        await EnsureRelationDoesNotExist(relation.CustomerId, relation.RelatedCustomerId, relation.Type);
+        await EnsureCustomerExistsAsync(relation.CustomerId, cancellationToken);
+        await EnsureCustomerExistsAsync(relation.RelatedCustomerId, cancellationToken);
+        await EnsureRelationDoesNotExistAsync(relation.CustomerId, relation.RelatedCustomerId, relation.Type, cancellationToken);
         var newRelation = new Relation
         {
             IndividualCustomerId = relation.CustomerId,
             RelatedCustomerId = relation.RelatedCustomerId,
             Type = relation.Type
         };
-        var relationId = await repo.AddRelation(newRelation);
+        var relationId = await repo.AddRelation(newRelation, cancellationToken);
 
         return relationId;
     }
 
-    public async Task DeleteRelation(int relationId)
+    public async Task DeleteRelation(int relationId, CancellationToken cancellationToken)
     {
-        var relationExists = await repo.GetRelationById(relationId);
+        var relationExists = await repo.GetRelationById(relationId, cancellationToken);
         if (relationExists == null) throw new NotFoundException($"Relation with ID: {relationId} not found");
-        await repo.DeleteRelation(relationExists);
+        await repo.DeleteRelation(relationExists, cancellationToken);
     }
 
-    public async Task<List<RelationReport>> GetRelationReport(int customerId)
+    public async Task<List<RelationReport>> GetRelationReport(int customerId, CancellationToken cancellationToken)
     {
-        var customer = await repo.GetCustomerFullDetailsById(customerId);
+        var customer = await repo.GetCustomerFullDetailsById(customerId, cancellationToken);
         if (customer == null) throw new NotFoundException($"Relation with ID: {customerId} not found");
         var relationReport = customer.Relations.GroupBy(r => r.Type)
             .Select(g => new RelationReport
@@ -204,15 +204,15 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
 
 
     // Helper Methods might move to a different class
-    private async Task EnsureCustomerExists(int customerId)
+    private async Task EnsureCustomerExistsAsync(int customerId, CancellationToken cancellationToken)
     {
-        var customer = await repo.GetCustomerById(customerId);
+        var customer = await repo.GetCustomerById(customerId, cancellationToken);
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
     }
 
-    private async Task EnsureRelationDoesNotExist(int customerId, int relatedCustomerId, RelationType type)
+    private async Task EnsureRelationDoesNotExistAsync(int customerId, int relatedCustomerId, RelationType type, CancellationToken cancellationToken)
     {
-        var exists = await repo.RelationExists(customerId, relatedCustomerId, type);
+        var exists = await repo.RelationExists(customerId, relatedCustomerId, type, cancellationToken);
         if (exists)
             throw new DuplicationException(
                 $"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
