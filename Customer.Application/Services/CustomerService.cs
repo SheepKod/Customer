@@ -116,7 +116,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
         // TODO: Optimize for large data
         var customers = await repo.SearchCustomers(search, paging);
 
-        var result = new PagedResult<IndividualCustomerSearchResultDTO>
+        var searchResult = new PagedResult<IndividualCustomerSearchResultDTO>
         {
             TotalCount = customers.TotalCount,
             PageNumber = customers.PageNumber,
@@ -125,7 +125,7 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
         };
         foreach (var customer in customers.Results)
         {
-            var  customerDTO= new IndividualCustomerSearchResultDTO
+            var customerDto = new IndividualCustomerSearchResultDTO
             {
                 Id = customer.Id,
                 FirstName = customer.FirstName,
@@ -138,22 +138,30 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICu
 
             if (customer.ImageKey == null)
             {
-                result.Results.Add(customerDTO);
+                searchResult.Results.Add(customerDto);
                 continue;
             }
-            var request = new GetPreSignedUrlRequest
-            {
-                BucketName = "tbc-customer-img",
-                Key = customer.ImageKey.ToString(),
-                Expires = DateTime.UtcNow.AddDays(1)
-            };
-            var url = await amazonS3.GetPreSignedURLAsync(request);
-            customerDTO.ImageUrl = url;
-            
-            result.Results.Add(customerDTO);
+
+            var url = await GetImageUrlAsync(customer.ImageKey.Value);
+            customerDto.ImageUrl = url;
+
+            searchResult.Results.Add(customerDto);
         }
-        
-        return result;
+
+        return searchResult;
+    }
+
+    private async Task<string> GetImageUrlAsync(Guid customerImageKey)
+    {
+        var request = new GetPreSignedUrlRequest
+        {
+            BucketName = "tbc-customer-img",
+            Key = customerImageKey.ToString(),
+            Expires = DateTime.UtcNow.AddDays(1)
+        };
+        var url = await amazonS3.GetPreSignedURLAsync(request);
+
+        return url;
     }
 
 
