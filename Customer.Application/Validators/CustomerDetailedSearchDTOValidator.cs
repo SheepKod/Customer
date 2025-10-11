@@ -1,19 +1,19 @@
 using Customer.Application.Constants;
 using Customer.Application.DTOs;
-using Customer.Application.Services;
+using Customer.Application.Resources;
 using Customer.Application.Validators.Extensions;
 using FluentValidation;
 
 public class CustomerDetailedSearchDTOValidator : AbstractValidator<CustomerDetailedSearchDTO>
 {
-    public CustomerDetailedSearchDTOValidator(LocalizationService localizer)
+    public CustomerDetailedSearchDTOValidator()
     {
         RuleFor(x => x.FirstName)
-            .OnlyGeorgianOrLatinLetters(localizer)
+            .OnlyGeorgianOrLatinLetters()
             .When(x => !string.IsNullOrWhiteSpace(x.FirstName));
 
         RuleFor(x => x.LastName)
-            .OnlyGeorgianOrLatinLetters(localizer)
+            .OnlyGeorgianOrLatinLetters()
             .When(x => !string.IsNullOrWhiteSpace(x.LastName));
 
         RuleFor(x => x.PersonalId)
@@ -29,9 +29,9 @@ public class CustomerDetailedSearchDTOValidator : AbstractValidator<CustomerDeta
             .When(x => x.Gender.HasValue);
 
         RuleFor(x => x.DateOfBirth)
-            .IsAdult(localizer)
+            .IsAdult()
             .When(x => x.DateOfBirth.HasValue)
-            .WithMessage(localizer[ValidationMessageKeys.InvalidAge]);
+            .WithMessage(ValidationMessages.InvalidAge);
 
         RuleFor(x => x.CityId)
             .GreaterThan(0)
@@ -39,7 +39,7 @@ public class CustomerDetailedSearchDTOValidator : AbstractValidator<CustomerDeta
 
         RuleFor(x => x.PhoneNumber)
             .Matches(RegexPatterns.PhoneNumber)
-            .WithMessage(localizer[ValidationMessageKeys.InvalidPhoneNumber])
+            .WithMessage(ValidationMessages.InvalidPhoneNumber)
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
         RuleFor(x => x.PhoneType)

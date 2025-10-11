@@ -1,22 +1,21 @@
-using System.Net;
 using Amazon.S3;
-using Customer.Application;
+using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
-using Customer.Application.Exceptions;
 using Customer.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Customer.API;
 
 [ApiController]
+[ProducesResponseType(400)]
+[ProducesResponseType(500)]
 [Route("api/v1/[controller]")]
-public class CustomersController(CustomerService customerService) : ControllerBase
+public class CustomersController(ICustomerService customerService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(typeof(int), 201)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<int>> AddCustomer([FromBody] AddCustomerDTO customer)
     {
         var customerId = await customerService.AddCustomer(customer);
@@ -25,9 +24,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpDelete("{id}")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
     public async Task<ActionResult> DeleteCustomer([FromRoute] int id)
     {
         await customerService.DeleteCustomer(id);
@@ -36,9 +33,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpPatch]
     [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
     public async Task<ActionResult> UpdateCustomer([FromBody] UpdateCustomerDTO updatedCustomerData)
     {
         await customerService.UpdateCustomer(updatedCustomerData);
@@ -47,8 +42,6 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpPost("Search")]
     [ProducesResponseType(typeof(PagedResult<IndividualCustomer>), 200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(500)]
     public async Task<ActionResult<PagedResult<IndividualCustomer>>> QuickSearch(
         [FromBody] CustomerDetailedSearchDTO customerDto, [FromQuery] PagingDTO pagingDto)
     {
@@ -59,30 +52,19 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpPost("Relations")]
     [ProducesResponseType(201)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(409)]
-    [ProducesResponseType(500)]
-    public async Task<IActionResult> AddRelation([FromBody] AddRelationDTO addRelation)
+    public async Task<ActionResult<int>> AddRelation([FromBody] AddRelationDTO addRelation)
     {
-        try
-        {
-            var relationId = await customerService.AddRelation(addRelation);
-            return StatusCode(StatusCodes.Status201Created, relationId);
-        }
-        catch (DuplicationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var relationId = await customerService.AddRelation(addRelation);
+        return StatusCode(StatusCodes.Status201Created, relationId);
     }
 
     [HttpDelete("Relations/{id}")]
     [ProducesResponseType(204)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(409)]
-    [ProducesResponseType(500)]
-    public async Task<IActionResult> DeleteRelation([FromRoute] int id)
+    public async Task<ActionResult> DeleteRelation([FromRoute] int id)
     {
         await customerService.DeleteRelation(id);
         return NoContent();
@@ -90,9 +72,7 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpGet("{id}/Relations")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
     public async Task<ActionResult<List<RelationReport>>> GetRelationReport([FromRoute] int id)
     {
         var report = await customerService.GetRelationReport(id);
@@ -101,20 +81,11 @@ public class CustomersController(CustomerService customerService) : ControllerBa
 
     [HttpPost("Image")]
     [ProducesResponseType(201)]
-    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
-    public async Task<IActionResult> UploadImage([FromForm] UploadImageDto uploadImageDto)
+    public async Task<ActionResult> UploadImage([FromForm] UploadImageDto uploadImageDto)
     {
-        try
-        {
-            await customerService.UploadImage(uploadImageDto.CustomerId, uploadImageDto.Image);
+        await customerService.UploadImage(uploadImageDto.CustomerId, uploadImageDto.Image);
 
-            return Created();
-        }
-        catch (AmazonS3Exception ex) when(ex.ErrorCode == StatusCodes.Status404NotFound.ToString())
-        {
-            return NotFound(ex.Message);
-        }
+        return Created();
     }
 }

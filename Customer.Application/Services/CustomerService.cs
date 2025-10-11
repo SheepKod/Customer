@@ -4,13 +4,14 @@ using Customer.Application.Abstractions;
 using Customer.Application.Dtos;
 using Customer.Application.DTOs;
 using Customer.Application.Exceptions;
+using Customer.Application.Resources;
 using Customer.Domain.Enums;
 using Customer.Domain.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Customer.Application;
 
-public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
+public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3) : ICustomerService
 {
     public async Task<int> AddCustomer(AddCustomerDTO customer)
     {
@@ -36,7 +37,6 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
     public async Task UpdateCustomer(UpdateCustomerDTO updatedCustomerData)
     {
         var customer = await repo.GetCustomerFullDetailsById(updatedCustomerData.CustomerId);
-
         if (customer == null)
             throw new NotFoundException($"Customer with ID: {updatedCustomerData.CustomerId} not found");
 
@@ -57,7 +57,6 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
             customer.CityId = updatedCustomerData.CityId.Value;
         }
 
-        
 
         if (updatedCustomerData.PhoneNumbers != null && updatedCustomerData.PhoneNumbers.Any())
         {
@@ -81,7 +80,15 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
         if (customer.ImageKey != Guid.Empty && customer.ImageKey != null)
         {
-            await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
+            try
+            {
+                await amazonS3.DeleteObjectAsync("tbc-customer-img", $"{customer.ImageKey}");
+            }
+            catch (AmazonS3Exception ex) when (ex.ErrorCode == StatusCodes.Status404NotFound.ToString())
+            {
+                throw new NotFoundException($"Image with ID : {customer.ImageKey} not found in S3", ex);
+            }
+
             customer.ImageKey = Guid.Empty;
             await repo.SaveChangesAsync();
         }
@@ -109,22 +116,6 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         return await repo.SearchCustomers(search, paging);
     }
 
-
-    public async Task<IndividualCustomer?> GetCustomerById(int customerId)
-    {
-        var customer = await repo.GetCustomerById(customerId);
-        if (customer == null) throw new NotFoundException($"Customer with ID: {customerId} not found");
-        return customer;
-    }
-
-    private List<PhoneNumber> ConvertPhoneNumbers(List<PhoneNumberDTO> phoneNumbers)
-    {
-        return phoneNumbers.Select(dto => new PhoneNumber
-        {
-            Number = dto.Number,
-            Type = dto.Type,
-        }).ToList();
-    }
 
     public async Task<int> AddRelation(AddRelationDTO addRelation)
     {
@@ -177,6 +168,15 @@ public class CustomerService(ICustomerRepository repo, IAmazonS3 amazonS3)
         if (exists)
             throw new DuplicationException(
                 $"Relation between {customerId} and {relatedCustomerId} with type {type} already exists");
+    }
+
+    private List<PhoneNumber> ConvertPhoneNumbers(List<PhoneNumberDTO> phoneNumbers)
+    {
+        return phoneNumbers.Select(dto => new PhoneNumber
+        {
+            Number = dto.Number,
+            Type = dto.Type,
+        }).ToList();
     }
 
     private void UpdatePhoneNumbers(List<PhoneNumber> existingNumbers, List<UpdatePhoneNumberDTO> incomingNumbers)

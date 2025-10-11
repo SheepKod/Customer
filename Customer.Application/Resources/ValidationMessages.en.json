@@ -1,6 +1,0 @@
-{
-  "InvalidAge": "Age must be at least 18 years old",
-  "TextOnlyGeorgianOrEnglish": "Text must contain only georgian or english characters",
-  "InvalidPhoneNumber": "Phone number must be exactly min 4 - max 50 digits",
-  "RelatedCustomerIdCannotBeTheSameAsTheCurrentCustomer": "Related customer cannot be the same as the current customer"
-}

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Customer.Application.Constants;
-using Customer.Application.Services;
+using Customer.Application.Resources;
 using FluentValidation;
 
 namespace Customer.Application.Validators.Extensions;
@@ -9,7 +9,7 @@ namespace Customer.Application.Validators.Extensions;
 public static class CustomValidationExtensions
 {
     public static IRuleBuilderOptions<T, string> OnlyGeorgianOrLatinLetters
-        <T>(this IRuleBuilder<T, string> ruleBuilder, LocalizationService localizer)
+        <T>(this IRuleBuilder<T, string> ruleBuilder)
     {
         return ruleBuilder
             .NotEmpty()
@@ -20,20 +20,18 @@ public static class CustomValidationExtensions
                 Regex.IsMatch(name, RegexPatterns.LatinLettersOnly) ||
                 Regex.IsMatch(name, RegexPatterns.GeorgianLettersOnly)
             )
-            .WithMessage($"{localizer[ValidationMessageKeys.TextOnlyGeorgianOrEnglish]}");
+            .WithMessage($"{ValidationMessages.TextOnlyGeorgianOrEnglish}");
     }
 
     public static IRuleBuilderOptions<T, string> ValidPersonalId<T>(this IRuleBuilder<T, string> ruleBuilder)
         => ruleBuilder.Length(11).Matches(RegexPatterns.NumericOnly);
 
-    public static IRuleBuilderOptions<T, DateTime?> IsAdult<T>(this IRuleBuilder<T, DateTime?> ruleBuilder,
-        LocalizationService localizer)
+    public static IRuleBuilderOptions<T, DateTime?> IsAdult<T>(this IRuleBuilder<T, DateTime?> ruleBuilder)
         => ruleBuilder.Must(date =>
-            IsAdult(date.Value)).WithMessage(localizer[ValidationMessageKeys.InvalidAge]);
+            IsAdult(date.Value)).WithMessage(ValidationMessages.InvalidAge);
 
-    public static IRuleBuilderOptions<T, DateTime> IsAdult<T>(this IRuleBuilder<T, DateTime> ruleBuilder,
-        LocalizationService localizer)
-        => ruleBuilder.Must(IsAdult).WithMessage(localizer[ValidationMessageKeys.InvalidAge]);
+    public static IRuleBuilderOptions<T, DateTime> IsAdult<T>(this IRuleBuilder<T, DateTime> ruleBuilder)
+        => ruleBuilder.Must(IsAdult).WithMessage(ValidationMessages.InvalidAge);
 
     public static bool IsAdult(DateTime date)
     {

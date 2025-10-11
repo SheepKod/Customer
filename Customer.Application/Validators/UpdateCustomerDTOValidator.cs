@@ -1,5 +1,4 @@
 using Customer.Application.Dtos;
-using Customer.Application.Services;
 using Customer.Application.Validators.Extensions;
 using FluentValidation;
 
@@ -7,17 +6,17 @@ namespace Customer.Application.Validators;
 
 public class UpdateCustomerDTOValidator : AbstractValidator<UpdateCustomerDTO>
 {
-    public UpdateCustomerDTOValidator(LocalizationService localizer)
+    public UpdateCustomerDTOValidator()
     {
         RuleFor(x => x.CustomerId)
             .GreaterThan(0);
 
         RuleFor(x => x.FirstName)
-            .OnlyGeorgianOrLatinLetters( localizer)
+            .OnlyGeorgianOrLatinLetters()
             .When(x => !string.IsNullOrWhiteSpace(x.FirstName));
 
         RuleFor(x => x.LastName)
-            .OnlyGeorgianOrLatinLetters(localizer)
+            .OnlyGeorgianOrLatinLetters()
             .When(x => !string.IsNullOrWhiteSpace(x.LastName));
 
         RuleFor(x => x.PersonalId)
@@ -29,7 +28,7 @@ public class UpdateCustomerDTOValidator : AbstractValidator<UpdateCustomerDTO>
             .When(x => x.Gender.HasValue);
 
         RuleFor(x => x.DateOfBirth)
-            .IsAdult(localizer)
+            .IsAdult()
             .When(x => x.DateOfBirth.HasValue);
 
         RuleFor(x => x.CityId)
@@ -37,7 +36,7 @@ public class UpdateCustomerDTOValidator : AbstractValidator<UpdateCustomerDTO>
             .When(x => x.CityId.HasValue);
 
         RuleForEach(x => x.PhoneNumbers)
-            .SetValidator(new UpdatePhoneNumberDTOValidator(localizer));
+            .SetValidator(new UpdatePhoneNumberDTOValidator());
 
     }
 }

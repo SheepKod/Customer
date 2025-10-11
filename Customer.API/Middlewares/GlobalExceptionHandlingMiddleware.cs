@@ -6,27 +6,35 @@ namespace Customer.API.Middlewares;
 
 public class GlobalExceptionHandlingMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlingMiddleware> logger)
 {
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
             await next(context);
         }
+        catch (DuplicationException ex)
+        {
+            logger.LogError(ex.Message, ex);
+            await HandleExceptionAsync(context, "Resource Conflict", ex.Message, ex.GetType().Name,
+                StatusCodes.Status409Conflict);
+        }
         catch (NotFoundException ex)
         {
             logger.LogError(ex.Message, ex);
-            await HandleExceptionAsync(context, "Resource Not Found", ex.Message,ex.GetType().Name,404);
+            await HandleExceptionAsync(context, "Resource Not Found", ex.Message, ex.GetType().Name,
+                StatusCodes.Status400BadRequest);
         }
         catch (Exception ex)
         {
             logger.LogError(ex.Message, ex);
-            
-            await HandleExceptionAsync(context, "Internal Server Error",  null,ex.GetType().Name,500);
+
+            await HandleExceptionAsync(context, "Internal Server Error", null, ex.GetType().Name,
+                StatusCodes.Status500InternalServerError);
         }
     }
-    
-    private static async Task HandleExceptionAsync(HttpContext context, string title, string? detail, string type, int statusCode)
+
+    private static async Task HandleExceptionAsync(HttpContext context, string title, string? detail, string type,
+        int statusCode)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
